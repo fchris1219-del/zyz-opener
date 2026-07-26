@@ -1,0 +1,82 @@
+<!-- 左宥之开场白管理 · 本地壳：拉取远程 opener.html -->
+<div id="zyz-mount" style="min-height:560px;background:#000;color:rgba(255,255,255,.7);font:13px/1.6 -apple-system,sans-serif;display:flex;align-items:center;justify-content:center;padding:28px;text-align:center">正在加载开场白管理…</div>
+<script>
+(function () {
+  var MOUNT_ID = 'zyz-mount';
+  var REMOTES = [
+    'https://cdn.jsdelivr.net/gh/fchris1219-del/zyz-opener@main/opener.html',
+    'https://fchris1219-del.github.io/zyz-opener/opener.html'
+  ];
+
+  function bust(url) {
+    return url + (url.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
+  }
+
+  async function fetchFirst(urls) {
+    var lastErr;
+    for (var i = 0; i < urls.length; i++) {
+      try {
+        var res = await fetch(bust(urls[i]), { cache: 'no-store' });
+        if (!res.ok) throw new Error(urls[i] + ' → ' + res.status);
+        return await res.text();
+      } catch (e) {
+        lastErr = e;
+        console.warn('[ZYZ opener] remote fail', urls[i], e);
+      }
+    }
+    throw lastErr || new Error('全部远程源失败');
+  }
+
+  function runScript(old) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      if (old.type) s.type = old.type;
+      if (old.src) {
+        s.src = old.src;
+        s.onload = function () { resolve(); };
+        s.onerror = function () { reject(new Error('script ' + old.src)); };
+        document.body.appendChild(s);
+      } else {
+        s.textContent = old.textContent;
+        document.body.appendChild(s);
+        resolve();
+      }
+    });
+  }
+
+  async function boot() {
+    var mount = document.getElementById(MOUNT_ID);
+    if (!mount) return;
+    try {
+      var text = await fetchFirst(REMOTES);
+      var doc = new DOMParser().parseFromString(text, 'text/html');
+      mount.innerHTML = '';
+      mount.removeAttribute('style');
+
+      doc.querySelectorAll('style').forEach(function (node) {
+        mount.appendChild(document.importNode(node, true));
+      });
+
+      var scripts = [];
+      Array.prototype.forEach.call(doc.body.childNodes, function (node) {
+        if (node.nodeName === 'SCRIPT') scripts.push(node);
+        else if (node.nodeType === 1 || node.nodeType === 3) {
+          if (node.nodeType === 3 && !String(node.textContent).trim()) return;
+          mount.appendChild(document.importNode(node, true));
+        }
+      });
+
+      for (var i = 0; i < scripts.length; i++) {
+        await runScript(scripts[i]);
+      }
+    } catch (e) {
+      console.error('[ZYZ opener]', e);
+      mount.setAttribute('style', 'min-height:240px;background:#000;color:#f66;font:13px/1.6 sans-serif;padding:24px;text-align:center');
+      mount.textContent = '开场白管理加载失败：' + (e && e.message ? e.message : e);
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>

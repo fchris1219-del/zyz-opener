@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>左宥之</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Courier+Prime:wght@400;700&family=Cormorant+Garamond:ital,wght@0,500;1,400;1,500&family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@200;300;400;500;600&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+html,body{
+  margin:0;padding:0;
+  font-family:'Noto Sans SC',-apple-system,sans-serif;
+  background:#000;
+  font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ══════════ 开场海报：先只出现安妮霍尔海报，点开才进入 app ══════════ */
+.splash{
+  position:fixed;inset:0;z-index:50;
+  background:#000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:opacity .5s ease, visibility .5s ease;
+}
+.splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+.splash-poster{
+  width:72%;max-width:280px;
+  box-shadow:0 30px 70px rgba(0,0,0,0.7);
+  transform:rotate(-1.5deg);
+  transition:transform .3s ease;
+}
+.splash:hover .splash-poster{transform:rotate(-2.2deg) translateY(-4px)}
+.splash-poster img{display:block;width:100%}
+.splash-hint{
+  margin-top:18px;
+  font-family:'Courier Prime',monospace;font-weight:700;font-size:10px;
+  letter-spacing:3px;color:rgba(255,255,255,0.55);text-transform:uppercase;
+}
+
+#zyz-app{
+  --bg-2:#000000;
+  --card:#ffffff;
+  --card-2:#eef1fa;
+  --line:rgba(15,15,20,0.13);
+  --line-2:rgba(15,15,20,0.24);
+  --accent:#0a1638;
+  --accent-2:#16244e;
+  --accent-dim:rgba(10,22,56,0.06);
+  --accent-line:rgba(10,22,56,0.32);
+  --glow:rgba(10,22,56,0.2);
+  --paper:#e9e5db;
+  --text:#37322b;
+  --text-2:rgba(55,50,43,0.78);
+  --text-3:rgba(55,50,43,0.55);
+  --text-4:rgba(55,50,43,0.3);
+  --hl:#0a1638;
+  --warn:#7a1f1f;
+  --onblue:#ffffff;
+  --onblue-2:rgba(255,255,255,0.76);
+  --onblue-3:rgba(255,255,255,0.5);
+  --onblue-line:rgba(255,255,255,0.3);
+}
+
+.app{
+  width:100%;max-width:480px;
+  height:85vh;min-height:560px;max-height:820px;
+  margin:0 auto;
+  background:var(--bg-2);
+  border-radius:0;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  box-shadow:0 0 0 1px var(--line),0 40px 90px rgba(0,0,0,0.6);
+  opacity:0;visibility:hidden;
+  transition:opacity .5s ease .05s, visibility .5s ease .05s;
+}
+.app.revealed{opacity:1;visibility:visible}
+
+.main{flex:1;overflow:hidden;position:relative;min-height:0}
+
+.view{
+  position:absolute;inset:0;
+  overflow-y:auto;overflow-x:hidden;
+  opacity:0;visibility:hidden;
+  transition:opacity .25s ease,visibility .25s ease;
+}
+.view::-webkit-scrollbar{width:0}
+.view.on{opacity:1;visibility:visible}
+
+/* ══════════ 票根：平顶 + 底边粗打孔 + 侧边内凹半圆齿痕 ══════════ */
+.ticket{
+  --r:10px;--gap:28px;--notch:9px;--notch-y:72%;
+  position:relative;
+  background:
+    linear-gradient(rgba(233,229,219,0.72), rgba(233,229,219,0.72)),
+    url('https://i.postimg.cc/W3YgWkhj/IMG-0320.jpg') center/cover no-repeat,
+    var(--paper);
+  /* 仅底部粗半圆打孔；顶部平直 */
+  -webkit-mask:
+    radial-gradient(circle var(--r) at var(--r) 100%, transparent var(--r), #000 calc(var(--r) + 0.6px)) bottom / var(--gap) var(--r) repeat-x,
+    linear-gradient(#000,#000) top / 100% calc(100% - var(--r)) no-repeat;
+  mask:
+    radial-gradient(circle var(--r) at var(--r) 100%, transparent var(--r), #000 calc(var(--r) + 0.6px)) bottom / var(--gap) var(--r) repeat-x,
+    linear-gradient(#000,#000) top / 100% calc(100% - var(--r)) no-repeat;
+  box-shadow:0 18px 40px rgba(0,0,0,0.35);
+  overflow:hidden;
+}
+/* 左右各一个内凹半圆齿痕（与纯黑底融合） */
+.ticket::before,
+.ticket::after{
+  content:'';
+  position:absolute;
+  width:calc(var(--notch) * 2);
+  height:calc(var(--notch) * 2);
+  border-radius:50%;
+  background:#000;
+  top:var(--notch-y);
+  transform:translateY(-50%);
+  z-index:6;
+  pointer-events:none;
+}
+.ticket::before{left:calc(var(--notch) * -1)}
+.ticket::after{right:calc(var(--notch) * -1)}
+
+/* ── 信息页：左右两张竖票根，等高 ── */
+#v-info{display:flex;flex-direction:column;height:100%;background:var(--bg-2);position:relative}
+
+.ticket-duo{display:flex;align-items:stretch;gap:12px;padding:54px 16px 24px}
+
+.v-ticket{
+  --r:11px;--gap:34px;--notch:9px;--notch-y:74%;
+  flex:1 1 0;min-width:0;
+  display:flex;flex-direction:column;
+  padding:15px 13px 18px;
+  font-family:'Noto Serif SC',serif;
+}
+
+/* 左票头像 */
+.v-ticket-photo img{
+  display:block;width:100%;aspect-ratio:3/4;object-fit:cover;object-position:center 15%;
+  margin-bottom:11px;flex-shrink:0;
+}
+
+/* 右票：已裁好的 CD 图，放在文字下方 */
+.v-ticket-notice .notice-art{
+  display:block;width:100%;margin-top:10px;flex-shrink:0;
+  line-height:0;
+}
+.v-ticket-notice .notice-art img{
+  display:block;width:100%;height:auto;margin:0;
+}
+
+.v-ticket-title{
+  font-family:'Noto Serif SC',serif;font-weight:700;font-size:16px;letter-spacing:0.5px;
+  text-align:left;color:var(--text);line-height:1.2;flex-shrink:0;
+}
+.v-ticket-title small{
+  display:block;font-family:'Cormorant Garamond','Noto Serif SC',serif;font-style:italic;font-weight:400;
+  font-size:11px;letter-spacing:1px;color:var(--text-3);margin-top:1px;text-transform:none;
+}
+.v-ticket-meta{
+  font-family:'Noto Serif SC',serif;font-weight:400;font-size:8.5px;line-height:1.85;
+  color:var(--text-2);text-align:left;letter-spacing:0.2px;flex-shrink:0;
+}
+.v-ticket-meta div{margin-bottom:1px}
+.v-ticket-meta b{color:var(--text);font-weight:600}
+.v-ticket-dots{border-top:1px dotted var(--text-4);margin:10px 0;flex-shrink:0}
+.v-ticket-quote{
+  font-family:'Noto Serif SC',serif;font-style:normal;font-weight:400;font-size:10px;
+  line-height:1.7;color:var(--text-2);text-align:left;padding:2px 0;margin-top:auto;
+}
+
+/* 右票：必读事项 */
+.notice-pages{flex:1;position:relative;min-height:0;overflow:visible}
+.notice-pages::-webkit-scrollbar{width:0}
+.notice-page{list-style:none;font-family:'Noto Serif SC',serif}
+.notice-page li{
+  font-family:'Noto Serif SC',serif;font-size:9.5px;line-height:1.55;color:var(--text-2);
+  margin-bottom:8px;padding-left:11px;position:relative;text-align:left;
+}
+.notice-page li::before{
+  content:'';position:absolute;left:0;top:6px;width:3px;height:3px;
+  background:var(--accent);border-radius:50%;
+}
+.notice-page .hl{color:var(--hl);font-weight:600}
+.notice-page .warn{color:var(--warn);font-weight:600}
+
+/* ── BGM 按钮：坐在纯蓝底上 ── */
+.bgm-btn{
+  position:absolute;top:16px;right:16px;z-index:5;
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,0.12);
+  border:1px solid var(--onblue-line);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .25s ease;color:var(--onblue-3);
+}
+.bgm-btn:hover{border-color:rgba(255,255,255,0.6);color:var(--onblue)}
+.bgm-btn:active{transform:scale(0.94)}
+.bgm-btn.on{color:var(--onblue);border-color:rgba(255,255,255,0.65);box-shadow:0 0 12px rgba(255,255,255,0.35)}
+
+.eq{display:flex;align-items:flex-end;gap:2px;height:13px}
+.eq span{width:2px;height:4px;background:currentColor;border-radius:1px;transition:height .25s ease}
+.bgm-btn.on .eq span{animation:eq .9s ease-in-out infinite}
+.bgm-btn.on .eq span:nth-child(2){animation-delay:.15s}
+.bgm-btn.on .eq span:nth-child(3){animation-delay:.3s}
+@keyframes eq{0%,100%{height:4px}50%{height:13px}}
+
+@media(prefers-reduced-motion:reduce){
+  .bgm-btn.on .eq span{animation:none;height:9px}
+}
+
+/* ── 开场白（电影开场） ── */
+#v-story{background:var(--bg-2);padding:20px;display:flex;flex-direction:column;height:100%}
+.story-header{margin-bottom:18px;flex-shrink:0}
+.story-title{font-family:'Cinzel',serif;font-size:19px;font-weight:600;color:var(--onblue);letter-spacing:1px}
+.story-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;color:var(--onblue-3);margin-top:5px;letter-spacing:0.5px}
+.story-grid{display:flex;flex-direction:column;gap:11px;flex:1;overflow-y:auto;min-height:0}
+.story-grid::-webkit-scrollbar{width:0}
+
+.story-card{background:var(--card);border:1px solid var(--line);border-radius:0;padding:16px 18px;cursor:pointer;transition:all .25s ease;display:flex;align-items:center;gap:15px;flex-shrink:0;position:relative;overflow:hidden}
+.story-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--accent);opacity:0;transition:opacity .25s;box-shadow:0 0 10px var(--glow)}
+.story-card:hover{border-color:var(--accent-line);background:var(--card-2)}
+.story-card:hover::before{opacity:1}
+.story-card:active{opacity:0.9}
+.story-num{width:40px;height:40px;background:var(--card-2);border:1px solid var(--line-2);border-radius:0;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .25s}
+.story-card:hover .story-num{border-color:var(--accent-line);background:var(--accent-dim)}
+.story-num span{font-family:'Courier Prime',monospace;font-size:14px;font-weight:700;color:var(--text-3);transition:color .25s;letter-spacing:0.5px}
+.story-card:hover .story-num span{color:var(--accent)}
+.story-info{flex:1;min-width:0}
+.story-name{font-size:14px;font-weight:500;color:var(--text);margin-bottom:5px;letter-spacing:0.5px}
+.story-desc{font-size:12px;color:var(--text-3);line-height:1.65}
+.story-arrow{width:15px;height:15px;color:var(--text-4);flex-shrink:0;transition:all .25s}
+.story-card:hover .story-arrow{color:var(--accent);transform:translateX(3px)}
+
+.empty{text-align:center;padding:60px 20px;color:var(--onblue-3);font-size:13px;letter-spacing:0.5px}
+.spin{width:22px;height:22px;border:2px solid rgba(255,255,255,0.25);border-top-color:#fff;border-radius:50%;margin:0 auto 14px;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── 线路索引 ── */
+#v-guide{background:var(--bg-2);padding:20px;display:flex;flex-direction:column;height:100%}
+.guide-list{display:flex;flex-direction:column;gap:11px;flex:1;overflow-y:auto;min-height:0}
+.guide-list::-webkit-scrollbar{width:0}
+.guide-tip{background:rgba(255,255,255,0.95);border:1px dashed var(--accent-line);border-radius:0;padding:12px 15px;font-size:11.5px;line-height:1.75;color:var(--text-2);flex-shrink:0}
+.guide-tip b{color:var(--accent);font-weight:600}
+.guide-tip .warn{color:var(--warn);font-weight:600}
+.guide-group{font-family:'Courier Prime',monospace;font-size:10px;font-weight:700;color:var(--onblue-2);letter-spacing:2.5px;margin:8px 2px 0;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.guide-group::before{content:'';width:3px;height:11px;background:var(--onblue);border-radius:2px;box-shadow:0 0 8px rgba(255,255,255,0.4)}
+.route-card{background:var(--card);border:1px solid var(--line);border-radius:0;padding:14px 16px;flex-shrink:0;transition:border-color .25s ease,background .25s ease}
+.route-card:hover{border-color:var(--line-2);background:var(--card-2)}
+.route-head{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+.route-name{font-size:14px;font-weight:500;color:var(--text);letter-spacing:0.5px}
+.route-tag{font-family:'Courier Prime',monospace;font-size:9px;font-weight:700;letter-spacing:1px;padding:2px 7px;border-radius:0;color:var(--accent);background:var(--accent-dim);border:1px solid var(--accent-line)}
+.route-tag.sp{color:#8a5a2f;border-color:rgba(138,90,47,0.3);background:rgba(138,90,47,0.08)}
+.route-rows{display:flex;flex-direction:column;gap:7px}
+.route-row{display:flex;gap:10px;font-size:12px;line-height:1.5}
+.route-k{flex-shrink:0;width:38px;color:var(--text-3);font-size:10.5px;letter-spacing:1px;padding-top:1px}
+.route-v{flex:1;color:var(--text-2);min-width:0}
+.route-v .acc{color:var(--accent);font-weight:600}
+.route-v .warn{color:var(--warn);font-weight:600}
+.route-v .off{color:var(--text-4)}
+.route-v b{color:var(--text);font-weight:500}
+@media(max-width:450px){#v-guide{padding:16px}}
+@media(max-width:375px){#v-guide{padding:14px}.route-row{font-size:11.5px}}
+@media(min-width:768px){#v-guide{padding:24px}.route-name{font-size:15px}.route-row{font-size:13px}}
+@media(min-width:1400px){#v-guide{padding:30px}}
+
+/* ── 原生底部标签导航：保留在 DOM 里供 JS 使用，视觉上隐藏 ── */
+.navbar{display:none}
+
+/* ── 新导航：一步一步，可前进可后退 ── */
+.step-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 18px;padding-bottom:max(13px,env(safe-area-inset-bottom));
+  border-top:1.5px dashed var(--onblue-line);
+  background:var(--bg-2);flex-shrink:0;
+}
+.step-btn{
+  display:flex;align-items:center;gap:6px;
+  background:none;border:1px solid var(--onblue-line);border-radius:0;
+  padding:9px 15px;
+  font-family:'Courier Prime',monospace;font-weight:700;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--onblue-2);cursor:pointer;transition:all .2s ease;
+}
+.step-btn:hover:not(:disabled){border-color:rgba(255,255,255,0.6);color:var(--onblue)}
+.step-btn:active:not(:disabled){transform:scale(0.96)}
+.step-btn:disabled{opacity:0.3;cursor:default}
+.step-dots{
+  font-family:'Courier Prime',monospace;font-weight:700;font-size:10.5px;letter-spacing:2px;
+  color:var(--onblue-3);text-transform:uppercase;
+}
+
+/* ══ 手机端：上下排票；用明确最小高度撑开酒馆消息框 ══ */
+@media(max-width:450px){
+  html,body{
+    height:auto!important;
+    min-height:580px!important;
+    overflow:visible!important;
+    background:#000;
+  }
+  /* 开场海报走文档流，强制占位，避免图未加载时高度塌成一条 */
+  .splash{
+    position:relative;inset:auto;
+    width:100%;
+    min-height:560px;
+    padding:40px 18px 32px;
+    box-sizing:border-box;
+  }
+  .splash.hide{display:none!important}
+  .splash-poster{
+    width:72%;max-width:280px;
+    aspect-ratio:2/3;
+    flex-shrink:0;
+  }
+  .splash-poster img{
+    display:block;width:100%;height:100%;
+    object-fit:cover;
+  }
+
+  .app{
+    position:relative;
+    max-width:none;width:100%;
+    height:auto!important;
+    min-height:580px!important;
+    max-height:none!important;
+    border-radius:0;box-shadow:none;
+    overflow:visible;
+  }
+  .app:not(.revealed){
+    position:absolute;width:0;height:0;min-height:0!important;
+    overflow:hidden;opacity:0;visibility:hidden;pointer-events:none;
+    display:flex; /* 保持结构，避免 display:none 导致酒馆不重算高度 */
+  }
+  .app.revealed{
+    position:relative;width:100%;
+    display:flex;opacity:1;visibility:visible;pointer-events:auto;
+    min-height:580px!important;
+  }
+
+  .main{
+    flex:0 0 auto;
+    height:auto;min-height:0;
+    overflow:visible;position:relative;
+  }
+  .view{
+    position:relative;inset:auto;
+    display:none!important;
+    height:auto;min-height:0;
+    overflow:visible;
+    opacity:1;visibility:visible;
+  }
+  .view.on{display:block!important}
+
+  #v-info{height:auto;overflow:visible}
+  .ticket-duo{
+    flex-direction:column;
+    align-items:center;
+    flex-shrink:0;
+    width:100%;
+    padding:40px 16px 24px;
+    gap:18px;
+  }
+  .v-ticket{
+    flex:0 0 auto;
+    width:100%;
+    max-width:340px;
+    padding:14px 12px 16px;
+    --notch-y:68%;
+  }
+  .v-ticket-photo img{aspect-ratio:3/4;max-height:none;height:auto}
+  .v-ticket-title{font-size:15px}
+  .notice-pages{flex:none;min-height:auto;overflow:visible}
+  .notice-page li{font-size:10px;line-height:1.55}
+  .bgm-btn{top:14px;right:14px;width:30px;height:30px}
+  #v-story,#v-guide{height:auto;min-height:0;padding:16px;overflow:visible}
+  .story-grid,.guide-list{flex:none;overflow:visible;min-height:auto}
+  .story-header{margin-bottom:15px}
+  .story-title{font-size:16px}
+  .story-card{padding:14px 16px;gap:13px}
+  .story-num{width:37px;height:37px}
+  .story-num span{font-size:13px}
+  .story-name{font-size:14px}
+  .story-desc{font-size:11.5px}
+  .step-bar{
+    flex-shrink:0;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+    align-items:center;
+    gap:6px;
+    padding:10px 10px;padding-bottom:max(10px,env(safe-area-inset-bottom));
+  }
+  .step-btn{
+    min-width:0;width:100%;
+    padding:8px 6px;
+    font-size:9px;letter-spacing:0.3px;
+    white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;
+    justify-content:center;
+  }
+  #stepPrev{justify-self:stretch}
+  #stepNext{justify-self:stretch}
+  .step-dots{
+    flex-shrink:0;
+    font-size:9px;letter-spacing:0.5px;
+    white-space:nowrap;
+    text-align:center;
+    padding:0 2px;
+  }
+}
+
+@media(max-width:375px){
+  .splash{min-height:520px;padding:32px 14px 24px}
+  html,body,.app.revealed{min-height:520px!important}
+  .ticket-duo{padding:36px 14px 20px;gap:16px}
+  .v-ticket{padding:12px 10px 14px;max-width:100%}
+  .v-ticket-quote{font-size:9.5px}
+  #v-story,#v-guide{padding:14px}
+  .story-card{padding:13px 15px;gap:11px}
+  .story-num{width:34px;height:34px}
+  .story-name{font-size:13px}
+  .story-desc{font-size:11px}
+  .step-bar{gap:4px;padding:9px 8px;padding-bottom:max(9px,env(safe-area-inset-bottom))}
+  .step-btn{padding:7px 4px;font-size:8.5px;letter-spacing:0}
+  .step-dots{font-size:8.5px;letter-spacing:0.3px}
+}
+
+/* ══ 平板 ══ */
+@media(min-width:768px) and (max-width:1023px){
+  body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#000}
+  .app{max-width:600px;height:85vh;min-height:620px;max-height:900px;border-radius:0;box-shadow:0 0 0 1px var(--line),0 40px 90px rgba(0,0,0,0.7)}
+  .ticket-duo{padding:60px 26px 22px;gap:16px}
+  .v-ticket{padding:16px 14px 14px}
+  .v-ticket-quote{font-size:11.5px}
+  .notice-page li{font-size:10.5px}
+  .bgm-btn{top:22px;right:22px;width:36px;height:36px}
+  #v-story{padding:24px}
+  .story-title{font-size:20px}
+  .story-card{padding:18px 22px;gap:16px}
+  .story-num{width:46px;height:46px}
+  .story-num span{font-size:16px}
+  .story-name{font-size:15px}
+  .story-desc{font-size:13px}
+  .step-bar{padding:12px 20px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+  .step-btn{padding:10px 18px;font-size:11px}
+}
+
+/* ══ 桌面 ══ */
+@media(min-width:1024px) and (max-width:1399px){
+  body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#000}
+  .app{max-width:560px;height:84vh;min-height:640px;max-height:920px;border-radius:0;box-shadow:0 0 0 1px var(--line),0 50px 120px rgba(0,0,0,0.75)}
+  .ticket-duo{padding:60px 28px 22px;gap:16px}
+  .v-ticket{padding:16px 14px 14px}
+  .v-ticket-quote{font-size:11.5px}
+  .notice-page li{font-size:10.5px}
+  .bgm-btn{top:22px;right:22px;width:36px;height:36px}
+  #v-story{padding:26px}
+  .story-title{font-size:20px}
+  .story-card{padding:19px 24px;gap:17px}
+  .story-num{width:48px;height:48px}
+  .story-num span{font-size:16px}
+  .story-name{font-size:15px}
+  .story-desc{font-size:13px}
+  .step-bar{padding:12px 22px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+  .step-btn{padding:10px 18px;font-size:11px}
+}
+
+/* ══ 大屏 ══ */
+@media(min-width:1400px){
+  body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#000}
+  .app{max-width:620px;height:82vh;min-height:680px;max-height:960px;border-radius:0;box-shadow:0 0 0 1px var(--line),0 60px 140px rgba(0,0,0,0.8)}
+  .ticket-duo{padding:64px 30px 24px;gap:18px}
+  .v-ticket{padding:18px 16px 15px}
+  .v-ticket-quote{font-size:12px}
+  .notice-page li{font-size:11px}
+  .bgm-btn{top:24px;right:24px;width:38px;height:38px}
+  #v-story{padding:30px}
+  .story-title{font-size:22px;letter-spacing:1px}
+  .story-card{padding:21px 26px;gap:18px}
+  .story-num{width:52px;height:52px}
+  .story-num span{font-size:17px}
+  .story-name{font-size:16px}
+  .story-desc{font-size:13.5px}
+  .step-bar{padding:14px 26px;padding-bottom:max(14px,env(safe-area-inset-bottom))}
+  .step-btn{padding:11px 20px;font-size:11px}
+}
+
+@media(hover:hover) and (pointer:fine){
+  .story-card:hover{box-shadow:0 6px 24px rgba(0,0,0,0.12)}
+}
+
+/* 强制纯蓝票根主题，抵抗酒馆主题覆盖 */
+#zyz-app.app{background:var(--bg-2)!important}
+#zyz-app #v-story,#zyz-app #v-guide{background:var(--bg-2)!important}
+#zyz-app #v-info{background:var(--bg-2)!important}
+#zyz-app .story-card,#zyz-app .route-card{background:var(--card)!important;border-color:var(--line)!important}
+#zyz-app .ticket{background-color:var(--paper)!important}
+#zyz-app .story-card:hover,#zyz-app .route-card:hover{background:var(--card-2)!important}
+#zyz-app .story-title{color:var(--onblue)!important}
+#zyz-app .story-sub{color:var(--onblue-3)!important}
+#zyz-app .story-name{color:var(--text)!important}
+#zyz-app .story-desc{color:var(--text-3)!important}
+#zyz-app .story-num span{color:var(--text-3)!important}
+#zyz-app .story-card:hover .story-num span{color:var(--accent)!important}
+#zyz-app .v-ticket-title{color:var(--text)!important}
+#zyz-app .v-ticket-quote{color:var(--text-2)!important}
+#zyz-app .notice-page{color:var(--text-2)!important}
+#zyz-app .navbar{background:var(--bg-2)!important}
+#zyz-app .hl{color:var(--hl)!important}
+#zyz-app .warn{color:var(--warn)!important}
+#zyz-app .bgm-btn{color:var(--onblue-3)!important;border-color:var(--onblue-line)!important}
+#zyz-app .bgm-btn.on{color:var(--onblue)!important}
+#zyz-app .eq span{background:currentColor!important}
+#zyz-app .guide-tip{background:rgba(255,255,255,0.95)!important;color:var(--text-2)!important}
+#zyz-app .guide-group{color:var(--onblue-2)!important}
+#zyz-app .route-name{color:var(--text)!important}
+#zyz-app .route-k{color:var(--text-3)!important}
+#zyz-app .route-v{color:var(--text-2)!important}
+</style>
+</head>
+<body>
+<audio id="snd" src="https://files.catbox.moe/31vqt3.mp3" preload="auto"></audio>
+<audio id="bgm" src="https://stillfreya.edgeone.app/Room%20Service%20-%20Holly%20Humberstone.mp3" loop preload="metadata"></audio>
+
+<div class="splash" id="splash">
+  <div class="splash-poster">
+    <img src="https://i.postimg.cc/Y91rscXR/annie-hall-1977-original-film-art-e87d09fb-8ab5-4762-870e-d96dce6fe4a0-5000x.webp" alt="Annie Hall poster">
+  </div>
+  <div class="splash-hint">tap the poster to enter</div>
+</div>
+
+<div class="app" id="zyz-app">
+  <div class="main">
+    <div class="view on" id="v-info">
+      <div class="bgm-btn" id="bgm-btn" role="button" tabindex="0" aria-label="背景音乐">
+        <div class="eq"><span></span><span></span><span></span></div>
+      </div>
+
+      <div class="ticket-duo">
+        <div class="ticket v-ticket v-ticket-photo">
+          <img src="https://i.postimg.cc/TPmFnrXb/6.jpg" alt="左宥之">
+          <div class="v-ticket-title">左宥之 <small>Zuo Youzhi on 7 july 2026</small></div>
+          <div class="v-ticket-dots"></div>
+          <div class="v-ticket-meta">
+            <div><b>作者：</b>山间玉　小红书@山肩雨</div>
+            <div><b>完全无雷，欢迎 repo </b> </div>
+            <div><b>发布社区：</b>旅程 / 多林国</div>
+            <div><b>人设类型：</b>年上狐狸男</div>
+          </div>
+          <div class="v-ticket-dots"></div>
+          <p class="v-ticket-quote">满贯流量影帝人设，诡计多端的骚货，值得玩弄的贱逼。</p>
+        </div>
+
+        <div class="ticket v-ticket v-ticket-notice">
+          <div class="v-ticket-title">观影须知</div>
+          <div class="v-ticket-dots"></div>
+          <div class="notice-pages">
+            <ul class="notice-page on">
+              <li>你哥性格非常神经质，这是一个骚逼、回避型、敏感肌、控制狂，还很爱装 <span class="hl">请多尝试，多调教他💗</span>。</li>
+              <li>目前只有BG<span class="hl">要改其他的自助，想透也可以自助</span>，想改GB可以试试布鲁克林线。</li>
+              <li>这是一张<span class="hl">变量卡</span>，请先下载<span class="hl">酒馆助手</span>，否则变量与状态栏无法正常运行。</li>
+              <li>导入后请<span class="warn">打开世界书自定义排序并阅读世界书信息</span>，可按说明阅读对应的特定条目（可参考底部「观影须知」页）。</li>
+              <li>推荐模型 <span class="hl">Claude Opus 4.6/4.8</span>。</li>
+              <li>(7.22更新三条开场白，世界书）作者后续还会持续更新世界书，目前自己试玩不动了，大家<span class="hl">多给点 repo</span></li>
+              <li>发布于 <span class="hl">Discord 社区多林国与旅程</span>，本卡<span class="warn">免费</span>，禁止倒卖引流。</li>
+            </ul>
+          </div>
+          <div class="notice-art">
+            <img src="https://i.postimg.cc/y69q04xj/IMG-0321.jpg" alt="Liquid Shire">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="v-story">
+      <div class="story-header">
+        <div class="story-title">电影开场</div>
+        <div class="story-sub">选择一个故事，推开那扇门</div>
+      </div>
+      <div class="story-grid" id="list"><div class="empty"><div class="spin"></div>加载中...</div></div>
+    </div>
+ 
+<div class="view" id="v-guide">
+  <div class="story-header">
+    <div class="story-title">观影规则</div>
+    <div class="story-sub">已自动化，仅供参考和检查</div>
+  </div>
+  <div class="guide-list">
+    <div class="guide-tip">已创建自动化脚本，无需手动打开条目，本索引是为了方便手动排查问题。<b>mvu_update</b> 常规线务必打开；<span class="warn">伪骨科／私生女变量自带更新规则，切勿再叠加 mvu_update</span>。背景、变量、nsfw 均为二选一，同组只开一个。点开场白后脚本会自动切线。</div>
+
+    <div class="guide-group">常规线</div>
+
+    <div class="route-card">
+      <div class="route-head"><span class="route-name">助理</span><span class="route-tag">常规</span></div>
+      <div class="route-rows">
+        <div class="route-row"><span class="route-k">背景</span><span class="route-v">漫游藻海 · 常规线背景</span></div>
+        <div class="route-row"><span class="route-k">变量</span><span class="route-v">常规变量 · <b>mvu_update</b></span></div>
+        <div class="route-row"><span class="route-k">nsfw</span><span class="route-v">常规 nsfw</span></div>
+        <div class="route-row"><span class="route-k">开场白</span><span class="route-v"><span class="acc">【常规·助理线】</span></span></div>
+      </div>
+    </div>
+
+    <div class="route-card">
+      <div class="route-head"><span class="route-name">小演员</span><span class="route-tag">常规</span></div>
+      <div class="route-rows">
+        <div class="route-row"><span class="route-k">背景</span><span class="route-v">漫游藻海 · 常规线背景</span></div>
+        <div class="route-row"><span class="route-k">变量</span><span class="route-v">常规变量 · <b>mvu_update</b></span></div>
+        <div class="route-row"><span class="route-k">nsfw</span><span class="route-v">常规 nsfw</span></div>
+        <div class="route-row"><span class="route-k">开场白</span><span class="route-v"><span class="acc">【常规·小演员线】</span></span></div>
+      </div>
+    </div>
+
+    <div class="route-card">
+      <div class="route-head"><span class="route-name">再见爱人</span><span class="route-tag">常规</span></div>
+      <div class="route-rows">
+        <div class="route-row"><span class="route-k">背景</span><span class="route-v">漫游藻海 · 常规线背景</span></div>
+        <div class="route-row"><span class="route-k">变量</span><span class="route-v">常规变量 · <b>mvu_update</b></span></div>
+        <div class="route-row"><span class="route-k">nsfw</span><span class="route-v">常规 nsfw</span></div>
+        <div class="route-row"><span class="route-k">开场白</span><span class="route-v"><span class="acc">【常规·前女友线】</span></span></div>
+      </div>
+    </div>
+
+    <div class="route-card">
+      <div class="route-head"><span class="route-name">嫂子梗 1</span><span class="route-tag">常规</span></div>
+      <div class="route-rows">
+        <div class="route-row"><span class="route-k">背景</span><span class="route-v">漫游藻海 · 常规线背景</span></div>
+        <div class="route-row"><span class="route-k">变量</span><span class="route-v">常规变量 · <b>mvu_update</b></span></div>
+        <div class="route-row"><span class="route-k">nsfw</span><span class="route-v">常规 nsfw</span></div>
+        <div class="route-row"><span class="route-k">开场白</span><span class="route-v"><span class="off">无对应条目</span></span></div>
+      </div>
+    </div>
+
+    <div class="route-card">
+      <div class="route-head"><span class="route-name">嫂子梗 2</span><span class="route-tag">常规</span></div>
+      <div class="route-rows">
+        <div class="route-row"><span class="route-k">背景</span><span class="route-v">常规线背景 <span class="warn">（不开漫游藻海）</span></span></div>
+        <div class="route-row"><span class="route-k">变量</span><span class="route-v">常规变量 · <b>mvu_update</b></span></div>
+        <div class="route-row"><span class="route-k">nsfw</span><span class="route-v">常规 nsfw</span></div>
+        <div class="route-row"><span class="route-k">开场白</span><span class="route-v"><span class="off">无对应条目</span>（微博马桶开场）</span></div>
+      </div>
+    </div>
+
+    <div class="route-card">
+      <div class="route-head"><span class="route-name">嫂子梗 3</span><span class="route-tag">常规</span></div>
+      <div class="route-rows">
+        <div class="route-row"><span class="route-k">背景</span><span class="route-v">常规线背景 <span class="warn">（不开漫游藻海）</span></span></div>
+        <div class="route-row"><span class="route-k">变量</span><span class="route-v">常规变量 · <b>mvu_update</b></span></div>
+        <div class="route-row"><span class="route-k">nsfw</span><span class="route-v">常规 nsfw</span></div>
+        <div class="route-row"><span class="route-k">开场白</span><span class="route-v"><span class="off">无对应条目</span>（微博 on left hand）</span></div>
+      </div>
+    </div>
+
+    <div class="route-card">
+      <div class="route-head"><span class="route-name">我哥是小三</span><span class="route-tag">常规</span></div>
+      <div class="route-rows">
+        <div class="route-row"><span class="route-k">背景</span><span class="route-v">漫游藻海 · 常规线背景</span></div>
+        <div class="route-row"><span class="route-k">变量</span><span class="route-v">常规变量 · <b>mvu_update</b></span></div>
+        <div class="route-row"><span class="route-k">nsfw</span><span class="route-v">常规 nsfw</span></div>
+        <div class="route-row"><span class="route-k">开场白</span><span class="route-v"><span class="acc">【常规·小三nsfw线】</span> <span class="warn">仅本线开启</span></span></div>
+      </div>
+    </div>
+
+    <div class="route-card">
+      <div class="route-head"><span class="route-name">布鲁克林巡礼</span><span class="route-tag">常规</span></div>
+      <div class="route-rows">
+        <div class="route-row"><span class="route-k">背景</span><span class="route-v">漫游藻海 · 常规线背景</span></div>
+        <div class="route-row"><span class="route-k">变量</span><span class="route-v">常规变量 · <b>mvu_update</b></span></div>
+        <div class="route-row"><span class="route-k">nsfw</span><span class="route-v">常规 nsfw</span></div>
+        <div class="route-row"><span class="route-k">开场白</span><span class="route-v"><span class="off">无对应条目</span>（结婚 / initvar10）</span></div>
+      </div>
+    </div>
+
+
+    <div class="route-card">
+      <div class="route-head"><span class="route-name">事后一杯奶</span><span class="route-tag">常规</span></div>
+      <div class="route-rows">
+        <div class="route-row"><span class="route-k">背景</span><span class="route-v">常规线背景 <span class="warn">（不开漫游藻海）</span></span></div>
+        <div class="route-row"><span class="route-k">变量</span><span class="route-v">常规变量 · <b>mvu_update</b></span></div>
+        <div class="route-row"><span class="route-k">nsfw</span><span class="route-v">常规 nsfw</span></div>
+        <div class="route-row"><span class="route-k">开场白</span><span class="route-v"><span class="acc">【常规·炮友线】</span>（炮友线 / initvar13）</span></div>
+      </div>
+    </div>
+
+    <div class="route-card">
+      <div class="route-head"><span class="route-name">哥哥你操粉吗？</span><span class="route-tag">常规</span></div>
+      <div class="route-rows">
+        <div class="route-row"><span class="route-k">背景</span><span class="route-v">常规线背景 <span class="warn">（不开漫游藻海）</span></span></div>
+        <div class="route-row"><span class="route-k">变量</span><span class="route-v">常规变量 · <b>mvu_update</b></span></div>
+        <div class="route-row"><span class="route-k">nsfw</span><span class="route-v">常规 nsfw</span></div>
+        <div class="route-row"><span class="route-k">开场白</span><span class="route-v"><span class="off">无对应条目</span>（装私生 / initvar14）</span></div>
+      </div>
+    </div>
+
+    <div class="guide-group">特殊线</div>
+
+    <div class="route-card">
+      <div class="route-head"><span class="route-name">关于布鲁克林的一切</span><span class="route-tag sp">伪骨科</span></div>
+      <div class="route-rows">
+        <div class="route-row"><span class="route-k">背景</span><span class="route-v">漫游藻海 · <b>【布鲁克林背景】</b> <span class="warn">关常规背景</span></span></div>
+        <div class="route-row"><span class="route-k">变量</span><span class="route-v">伪骨科变量 <span class="warn">（不开 mvu_update）</span></span></div>
+        <div class="route-row"><span class="route-k">nsfw</span><span class="route-v">伪骨科 nsfw（把常规nsfw也打开有可能有奇效）</span></div>
+        <div class="route-row"><span class="route-k">开场白</span><span class="route-v"><span class="off">无对应条目</span></span></div>
+      </div>
+    </div>
+
+    <div class="route-card">
+      <div class="route-head"><span class="route-name">布鲁克林的荒唐事</span><span class="route-tag sp">男高</span></div>
+      <div class="route-rows">
+        <div class="route-row"><span class="route-k">背景</span><span class="route-v">漫游藻海 · <b>【布鲁克林背景】</b> <span class="warn">关常规背景</span></span></div>
+        <div class="route-row"><span class="route-k">变量</span><span class="route-v">常规变量 · <b>mvu_update</b></span></div>
+        <div class="route-row"><span class="route-k">nsfw</span><span class="route-v">常规 nsfw</span></div>
+        <div class="route-row"><span class="route-k">开场白</span><span class="route-v"><span class="off">无对应条目</span>（男高线 / initvar11）</span></div>
+      </div>
+    </div>
+
+    <div class="route-card">
+      <div class="route-head"><span class="route-name">老师我想和你聊骚</span><span class="route-tag sp">网黄梗</span></div>
+      <div class="route-rows">
+        <div class="route-row"><span class="route-k">背景</span><span class="route-v"><span class="warn">全部关闭</span>（漫游藻海 / 常规线背景）</span></div>
+        <div class="route-row"><span class="route-k">变量</span><span class="route-v">常规变量 · <b>mvu_update</b></span></div>
+        <div class="route-row"><span class="route-k">nsfw</span><span class="route-v">常规 nsfw</span></div>
+        <div class="route-row"><span class="route-k">开场白</span><span class="route-v"><span class="acc">【常规·网黄线】</span></span></div>
+      </div>
+    </div>
+
+    <div class="route-card">
+      <div class="route-head"><span class="route-name">今天的我是好孩子吗？</span><span class="route-tag sp">私生女</span></div>
+      <div class="route-rows">
+        <div class="route-row"><span class="route-k">背景</span><span class="route-v">漫游藻海 · 常规线背景</span></div>
+        <div class="route-row"><span class="route-k">变量</span><span class="route-v">私生女变量 <span class="warn">（不开 mvu_update）</span></span></div>
+        <div class="route-row"><span class="route-k">nsfw</span><span class="route-v">常规 nsfw</span></div>
+        <div class="route-row"><span class="route-k">开场白</span><span class="route-v"><span class="acc">【常规·私生女线】</span> <span class="off">可开可不开（大纲指导）</span></span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+  </div>
+
+  <div class="step-bar">
+    <button class="step-btn" id="stepPrev" type="button">‹ 上一步</button>
+    <div class="step-dots" id="stepDots">1 / 3</div>
+    <button class="step-btn" id="stepNext" type="button">观影须知 ›</button>
+  </div>
+  <div class="navbar" id="navbar"></div>
+</div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+
+/* ── 音效 ── */
+const snd=$('snd');
+snd.volume=0.55;
+const play=()=>{try{if(snd.readyState>=2){snd.currentTime=0;snd.play()}}catch(e){}};
+
+/* ── 背景音乐 ── */
+const bgm=$('bgm');
+const bgmBtn=$('bgm-btn');
+bgm.volume=0.3;
+let bgmTried=false;
+
+const syncBgm=()=>bgmBtn.classList.toggle('on',!bgm.paused);
+
+const toggleBgm=e=>{
+  if(e)e.stopPropagation();
+  bgmTried=true;
+  if(bgm.paused){bgm.play().catch(()=>{})}else{bgm.pause()}
+};
+
+bgmBtn.addEventListener('click',toggleBgm);
+bgmBtn.addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleBgm(e)}
+});
+bgm.addEventListener('play',syncBgm);
+bgm.addEventListener('pause',syncBgm);
+
+// 首次任意点击时顺带把 BGM 带起来；被浏览器拦下就静默失败，等按钮
+const tryBgm=()=>{
+  if(bgmTried)return;
+  bgmTried=true;
+  bgm.play().catch(()=>{});
+};
+
+/* ── 导航 ── */
+const navs=[
+  {id:'v-info',icon:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',label:'信息'},
+  {id:'v-guide',icon:'<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>',label:'索引'},
+  {id:'v-story',icon:'<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>',label:'开场白'}
+];
+
+$('navbar').innerHTML=navs.map((n,i)=>`<div class="nav-item${i===0?' on':''}" data-v="${n.id}"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${n.icon}</svg><span class="nav-label">${n.label}</span></div>`).join('');
+
+document.querySelectorAll('.nav-item').forEach(n=>{
+  n.onclick=()=>{
+    play();tryBgm();
+    document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('on'));
+    n.classList.add('on');
+    document.querySelectorAll('.view').forEach(v=>{
+      v.classList.remove('on');
+      if(v.id===n.dataset.v){v.classList.add('on');v.scrollTop=0}
+    });
+  };
+});
+
+/* ── 开场白列表 ── */
+async function init(){
+  const list=$('list');
+  try{
+    const msgs=await getChatMessages("0",{include_swipe:true});
+    if(!msgs||!msgs[0]?.swipes||msgs[0].swipes.length<=1){list.innerHTML='<div class="empty">暂无故事</div>';return}
+    list.innerHTML='';
+    for(let i=1;i<msgs[0].swipes.length;i++){
+      const c=msgs[0].swipes[i];
+      let title=`开场白 ${String(i).padStart(2,'0')}`,desc='点击进入故事';
+      const tm=c.match(/<!--\s*title:\s*(.*?)\s*-->/);if(tm)title=tm[1].trim();
+      const dm=c.match(/<!--\s*desc:\s*(.*?)(?=\s*-->)-->/s);if(dm)desc=dm[1].trim();
+      const el=document.createElement('div');
+      el.className='story-card';
+      el.innerHTML=`<div class="story-num"><span>${String(i).padStart(2,'0')}</span></div><div class="story-info"><div class="story-name">${title}</div><div class="story-desc">${desc}</div></div><svg class="story-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>`;
+      el.onclick=async()=>{
+        play();tryBgm();
+        const m=await getChatMessages("0",{include_swipe:true});
+        if(m?.[0]?.swipes?.[i])await setChatMessage(m[0].swipes[i],0,{swipe_id:i,refresh:'display_and_render_current'});
+  try{ eventEmit('zyz:route', i); }catch(e){ console.warn('[ZYZ] 切线失败',e); }
+      };
+      list.appendChild(el);
+    }
+  }catch(e){list.innerHTML='<div class="empty">加载失败</div>'}
+}
+
+// 脚本可能在 DOMContentLoaded 之后才执行，直接监听会永远等不到
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
+else init();
+})();
+</script>
+
+<script>
+/* 新增：点击开场海报后才显示 app，同时触发 BGM；并同步高度给酒馆消息框 */
+(function(){
+  var splash=document.getElementById('splash');
+  var app=document.getElementById('zyz-app');
+  var bgm=document.getElementById('bgm');
+  var snd=document.getElementById('snd');
+  if(!splash||!app)return;
+
+  function syncHeight(){
+    try{
+      var h=Math.max(
+        document.documentElement.scrollHeight||0,
+        document.body.scrollHeight||0,
+        splash.classList.contains('hide')?(app.scrollHeight||0):(splash.scrollHeight||0),
+        560
+      );
+      document.documentElement.style.minHeight=h+'px';
+      document.body.style.minHeight=h+'px';
+      if(window.frameElement){
+        window.frameElement.style.height=h+'px';
+        window.frameElement.style.maxHeight='none';
+      }
+    }catch(e){}
+  }
+
+  splash.addEventListener('click',function(){
+    splash.classList.add('hide');
+    app.classList.add('revealed');
+    try{ if(snd&&snd.readyState>=2){ snd.currentTime=0; snd.play(); } }catch(e){}
+    try{ bgm&&bgm.play().catch(function(){}); }catch(e){}
+    requestAnimationFrame(function(){ syncHeight(); setTimeout(syncHeight,80); });
+  });
+
+  var poster=splash.querySelector('img');
+  if(poster){
+    if(poster.complete)syncHeight();
+    else poster.addEventListener('load',syncHeight);
+  }
+  window.addEventListener('load',syncHeight);
+  window.addEventListener('resize',syncHeight);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',syncHeight);
+  else syncHeight();
+  // 切页后也重算
+  document.addEventListener('click',function(e){
+    if(e.target.closest('.nav-item,.step-btn'))setTimeout(syncHeight,50);
+  });
+})();
+</script>
+
+<script>
+/* 新增：一步一步的前进/后退导引，复用原生 .nav-item 的点击逻辑，不改动上面任何函数/变量 */
+(function(){
+  function boot(){
+    var order=['v-info','v-guide','v-story'];
+    var labels={'v-info':'电影票','v-guide':'观影规则','v-story':'电影开场'};
+    var nextLabels={'v-info':'观影规则'};
+    var prevBtn=document.getElementById('stepPrev');
+    var nextBtn=document.getElementById('stepNext');
+    var dots=document.getElementById('stepDots');
+    if(!prevBtn||!nextBtn||!dots)return;
+
+    function currentIndex(){
+      var onItem=document.querySelector('.nav-item.on');
+      var id=onItem?onItem.dataset.v:'v-info';
+      var idx=order.indexOf(id);
+      return idx<0?0:idx;
+    }
+    function updateUI(){
+      var idx=currentIndex();
+      prevBtn.disabled=idx<=0;
+      nextBtn.disabled=idx>=order.length-1;
+      dots.textContent=labels[order[idx]]+' · '+(idx+1)+' / '+order.length;
+      if(idx>0)prevBtn.textContent='‹ '+labels[order[idx-1]];
+      if(idx<order.length-1){
+        var here=order[idx];
+        nextBtn.textContent=(nextLabels[here]||labels[order[idx+1]])+' ›';
+      }
+    }
+    function goTo(idx){
+      idx=Math.max(0,Math.min(order.length-1,idx));
+      var items=document.querySelectorAll('.nav-item');
+      var target=null;
+      items.forEach(function(it){ if(it.dataset.v===order[idx])target=it; });
+      if(target)target.click();
+      updateUI();
+    }
+    prevBtn.addEventListener('click',function(){ goTo(currentIndex()-1); });
+    nextBtn.addEventListener('click',function(){ goTo(currentIndex()+1); });
+    updateUI();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);
+  else boot();
+})();
+</script>
+
+</body>
+</html>
