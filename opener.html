@@ -294,19 +294,19 @@ html,body{
   color:var(--onblue-3);text-transform:uppercase;
 }
 
-/* ══ 手机端：上下排票；用明确最小高度撑开酒馆消息框 ══ */
-@media(max-width:450px){
+/* ══ 手机 / 窄屏：内容多高就多高，禁止 min-height 把底部撑出黑洞 ══ */
+@media(max-width:768px){
   html,body{
     height:auto!important;
-    min-height:580px!important;
+    min-height:0!important;
     overflow:visible!important;
     background:#000;
   }
-  /* 开场海报走文档流，强制占位，避免图未加载时高度塌成一条 */
   .splash{
     position:relative;inset:auto;
     width:100%;
-    min-height:560px;
+    min-height:0;
+    height:auto;
     padding:40px 18px 32px;
     box-sizing:border-box;
   }
@@ -325,7 +325,7 @@ html,body{
     position:relative;
     max-width:none;width:100%;
     height:auto!important;
-    min-height:580px!important;
+    min-height:0!important;
     max-height:none!important;
     border-radius:0;box-shadow:none;
     overflow:visible;
@@ -333,29 +333,36 @@ html,body{
   .app:not(.revealed){
     position:absolute;width:0;height:0;min-height:0!important;
     overflow:hidden;opacity:0;visibility:hidden;pointer-events:none;
-    display:flex; /* 保持结构，避免 display:none 导致酒馆不重算高度 */
+    display:flex;
   }
   .app.revealed{
     position:relative;width:100%;
-    display:flex;opacity:1;visibility:visible;pointer-events:auto;
-    min-height:580px!important;
+    display:flex;flex-direction:column;
+    opacity:1;visibility:visible;pointer-events:auto;
+    height:auto!important;
+    min-height:0!important;
   }
 
   .main{
-    flex:0 0 auto;
-    height:auto;min-height:0;
-    overflow:visible;position:relative;
+    flex:0 0 auto!important;
+    height:auto!important;min-height:0!important;
+    overflow:visible!important;position:relative;
   }
   .view{
-    position:relative;inset:auto;
+    position:relative!important;inset:auto!important;
     display:none!important;
-    height:auto;min-height:0;
-    overflow:visible;
-    opacity:1;visibility:visible;
+    height:auto!important;min-height:0!important;
+    overflow:visible!important;
+    opacity:1!important;visibility:visible!important;
   }
   .view.on{display:block!important}
 
-  #v-info{height:auto;overflow:visible}
+  #v-info{
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+    display:block!important;
+  }
   .ticket-duo{
     flex-direction:column;
     align-items:center;
@@ -376,7 +383,7 @@ html,body{
   .notice-pages{flex:none;min-height:auto;overflow:visible}
   .notice-page li{font-size:10px;line-height:1.55}
   .bgm-btn{top:14px;right:14px;width:30px;height:30px}
-  #v-story,#v-guide{height:auto;min-height:0;padding:16px;overflow:visible}
+  #v-story,#v-guide{height:auto!important;min-height:0!important;padding:16px;overflow:visible}
   .story-grid,.guide-list{flex:none;overflow:visible;min-height:auto}
   .story-header{margin-bottom:15px}
   .story-title{font-size:16px}
@@ -386,7 +393,7 @@ html,body{
   .story-name{font-size:14px}
   .story-desc{font-size:11.5px}
   .step-bar{
-    flex-shrink:0;
+    flex:0 0 auto!important;
     display:grid;
     grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
     align-items:center;
@@ -413,8 +420,7 @@ html,body{
 }
 
 @media(max-width:375px){
-  .splash{min-height:520px;padding:32px 14px 24px}
-  html,body,.app.revealed{min-height:520px!important}
+  .splash{padding:32px 14px 24px}
   .ticket-duo{padding:36px 14px 20px;gap:16px}
   .v-ticket{padding:12px 14px 14px;max-width:100%}
   .v-ticket-quote{font-size:10px}
@@ -852,12 +858,19 @@ else init();
 
   function syncHeight(){
     try{
-      var h=Math.max(
-        document.documentElement.scrollHeight||0,
-        document.body.scrollHeight||0,
-        splash.classList.contains('hide')?(app.scrollHeight||0):(splash.scrollHeight||0),
-        560
+      // 先清掉旧 minHeight，避免 scrollHeight 自我膨胀
+      document.documentElement.style.minHeight='';
+      document.body.style.minHeight='';
+      var target=splash.classList.contains('hide')?app:splash;
+      var h=Math.ceil(
+        Math.max(
+          target?target.scrollHeight:0,
+          target?target.offsetHeight:0,
+          1
+        )
       );
+      document.documentElement.style.height=h+'px';
+      document.body.style.height=h+'px';
       document.documentElement.style.minHeight=h+'px';
       document.body.style.minHeight=h+'px';
       if(window.frameElement){
