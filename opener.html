@@ -65,7 +65,7 @@ html,body{
 }
 
 .app{
-  width:100%;max-width:560px;
+  width:100%;max-width:640px;
   height:85vh;min-height:560px;max-height:820px;
   margin:0 auto;
   background:var(--bg-2);
@@ -127,13 +127,13 @@ html,body{
 /* ── 信息页：左右两张竖票根，等高 ── */
 #v-info{display:flex;flex-direction:column;height:100%;background:var(--bg-2);position:relative}
 
-.ticket-duo{display:flex;align-items:stretch;gap:14px;padding:54px 14px 24px}
+.ticket-duo{display:flex;align-items:flex-start;gap:16px;padding:48px 12px 24px}
 
 .v-ticket{
   --r:11px;--gap:34px;--notch:9px;--notch-y:74%;
   flex:1 1 0;min-width:0;
   display:flex;flex-direction:column;
-  padding:15px 16px 18px;
+  padding:16px 18px 16px;
   font-family:'Noto Serif SC',serif;
 }
 
@@ -166,11 +166,11 @@ html,body{
 }
 .v-ticket-meta div{margin-bottom:1px}
 .v-ticket-meta b{color:var(--text);font-weight:600}
-.v-ticket-dots{border-top:1px dotted var(--text-4);margin:10px 0;flex-shrink:0}
+.v-ticket-dots{border-top:1px dotted var(--text-4);margin:8px 0;flex-shrink:0}
 .v-ticket-quote{
-  font-family:'Noto Serif SC',serif;font-style:normal;font-weight:400;font-size:10.5px;
-  line-height:1.7;color:var(--text-2);text-align:left;
-  padding:2px 0 0;margin:0;width:100%;flex-shrink:0;
+  font-family:'Noto Serif SC',serif;font-style:normal;font-weight:400;font-size:11px;
+  line-height:1.65;color:var(--text-2);text-align:left;
+  padding:0;margin:0;width:100%;max-width:100%;flex:0 0 auto;
 }
 
 /* 右票：必读事项 */
@@ -365,8 +365,8 @@ html,body{
   .v-ticket{
     flex:0 0 auto;
     width:100%;
-    max-width:400px;
-    padding:14px 16px 16px;
+    max-width:460px;
+    padding:14px 18px 16px;
     --notch-y:68%;
   }
   .v-ticket-photo img{aspect-ratio:3/4;max-height:none;height:auto}
@@ -429,9 +429,9 @@ html,body{
 /* ══ 平板 ══ */
 @media(min-width:768px) and (max-width:1023px){
   body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#000}
-  .app{max-width:680px;height:85vh;min-height:620px;max-height:900px;border-radius:0;box-shadow:0 0 0 1px var(--line),0 40px 90px rgba(0,0,0,0.7)}
-  .ticket-duo{padding:60px 22px 22px;gap:18px}
-  .v-ticket{padding:16px 18px 14px}
+  .app{max-width:760px;height:85vh;min-height:620px;max-height:900px;border-radius:0;box-shadow:0 0 0 1px var(--line),0 40px 90px rgba(0,0,0,0.7)}
+  .ticket-duo{padding:52px 18px 22px;gap:20px}
+  .v-ticket{padding:16px 20px 14px}
   .v-ticket-quote{font-size:11.5px}
   .notice-page li{font-size:10.5px}
   .bgm-btn{top:22px;right:22px;width:36px;height:36px}
@@ -449,9 +449,9 @@ html,body{
 /* ══ 桌面 ══ */
 @media(min-width:1024px) and (max-width:1399px){
   body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#000}
-  .app{max-width:640px;height:84vh;min-height:640px;max-height:920px;border-radius:0;box-shadow:0 0 0 1px var(--line),0 50px 120px rgba(0,0,0,0.75)}
-  .ticket-duo{padding:60px 24px 22px;gap:18px}
-  .v-ticket{padding:16px 18px 14px}
+  .app{max-width:720px;height:84vh;min-height:640px;max-height:920px;border-radius:0;box-shadow:0 0 0 1px var(--line),0 50px 120px rgba(0,0,0,0.75)}
+  .ticket-duo{padding:52px 18px 22px;gap:20px}
+  .v-ticket{padding:16px 20px 14px}
   .v-ticket-quote{font-size:11.5px}
   .notice-page li{font-size:10.5px}
   .bgm-btn{top:22px;right:22px;width:36px;height:36px}
@@ -469,9 +469,9 @@ html,body{
 /* ══ 大屏 ══ */
 @media(min-width:1400px){
   body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#000}
-  .app{max-width:720px;height:82vh;min-height:680px;max-height:960px;border-radius:0;box-shadow:0 0 0 1px var(--line),0 60px 140px rgba(0,0,0,0.8)}
-  .ticket-duo{padding:64px 26px 24px;gap:20px}
-  .v-ticket{padding:18px 20px 15px}
+  .app{max-width:800px;height:82vh;min-height:680px;max-height:960px;border-radius:0;box-shadow:0 0 0 1px var(--line),0 60px 140px rgba(0,0,0,0.8)}
+  .ticket-duo{padding:56px 22px 24px;gap:22px}
+  .v-ticket{padding:18px 22px 15px}
   .v-ticket-quote{font-size:12px}
   .notice-page li{font-size:11px}
   .bgm-btn{top:24px;right:24px;width:38px;height:38px}

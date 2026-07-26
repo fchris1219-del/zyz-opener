@@ -4,8 +4,8 @@
 
 ## 远程地址
 
-- jsDelivr：`https://cdn.jsdelivr.net/gh/fchris1219-del/zyz-opener@main/opener.html`
-- GitHub Pages：`https://fchris1219-del.github.io/zyz-opener/opener.html`
+- **推荐（少缓存）**：`https://raw.githubusercontent.com/fchris1219-del/zyz-opener/main/opener.html`
+- jsDelivr（备用，`@main` 可能缓存较久）：`https://cdn.jsdelivr.net/gh/fchris1219-del/zyz-opener@main/opener.html`
 
 ## 用法
 
