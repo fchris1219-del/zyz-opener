@@ -355,12 +355,16 @@ html,body{
     overflow:visible!important;
     opacity:1!important;visibility:visible!important;
   }
-  .view.on{display:block!important}
-
-  #v-info{
+  /* 必须盖过 #v-info{display:flex}，否则电影票会跟下一页叠在一起 */
+  #zyz-app .view{display:none!important}
+  #zyz-app .view.on{display:block!important}
+  #zyz-app #v-info.view.on{
+    display:flex!important;
+    flex-direction:column!important;
     height:auto!important;
-    min-height:0!important;
-    overflow:visible!important;
+  }
+  #zyz-app #v-guide.view.on,
+  #zyz-app #v-story.view.on{
     display:block!important;
   }
   .ticket-duo{
@@ -435,7 +439,7 @@ html,body{
 }
 
 /* ══ 平板 ══ */
-@media(min-width:768px) and (max-width:1023px){
+@media(min-width:769px) and (max-width:1023px){
   body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#000}
   .app{max-width:760px;height:85vh;min-height:620px;max-height:900px;border-radius:0;box-shadow:0 0 0 1px var(--line),0 40px 90px rgba(0,0,0,0.7)}
   .ticket-duo{padding:52px 18px 22px;gap:20px}
