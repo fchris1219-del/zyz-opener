@@ -1,82 +1,131 @@
-<!-- 左宥之开场白管理 · 本地壳：拉取远程 opener.html -->
-<div id="zyz-mount" style="min-height:560px;background:#000;color:rgba(255,255,255,.7);font:13px/1.6 -apple-system,sans-serif;display:flex;align-items:center;justify-content:center;padding:28px;text-align:center">正在加载开场白管理…</div>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>左宥之 · 开场白</title>
+<style>
+html,body{margin:0;padding:0;background:#000;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+#boot{max-width:480px;min-height:560px;margin:0 auto;display:flex;align-items:center;justify-content:center;
+  background:#000;color:rgba(255,255,255,.72);font-size:14px;text-align:center;padding:24px;box-sizing:border-box}
+#boot .spin{width:22px;height:22px;margin:14px auto 0;border:2px solid rgba(255,255,255,.55);border-top-color:transparent;
+  border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#boot button{margin-top:14px;padding:8px 16px;border:1px solid rgba(255,255,255,.35);border-radius:0;background:transparent;color:#fff;cursor:pointer;letter-spacing:1px}
+#boot .sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:8px;line-height:1.5;word-break:break-all}
+</style>
+</head>
+<body>
+<div id="boot">
+  <div>
+    <div style="font-size:22px;margin-bottom:8px">🎬</div>
+    <div id="tt">正在加载开场白管理…</div>
+    <div class="sub" id="sub">从远端拉取 UI</div>
+    <div class="spin"></div>
+  </div>
+</div>
 <script>
 (function () {
-  var MOUNT_ID = 'zyz-mount';
-  var REMOTES = [
-    'https://cdn.jsdelivr.net/gh/fchris1219-del/zyz-opener@main/opener.html',
-    'https://fchris1219-del.github.io/zyz-opener/opener.html'
-  ];
+  var HTML_URL = 'https://cdn.jsdelivr.net/gh/fchris1219-del/zyz-opener@main/opener.html';
+  var FALLBACK_URL = 'https://fchris1219-del.github.io/zyz-opener/opener.html';
+  var RETRY = 3;
+  var TIMEOUT = 15000;
 
-  function bust(url) {
-    return url + (url.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
+  function setStatus(t, s) {
+    var a = document.getElementById('tt');
+    var b = document.getElementById('sub');
+    if (a) a.textContent = t;
+    if (b) b.textContent = s || '';
   }
 
-  async function fetchFirst(urls) {
-    var lastErr;
-    for (var i = 0; i < urls.length; i++) {
-      try {
-        var res = await fetch(bust(urls[i]), { cache: 'no-store' });
-        if (!res.ok) throw new Error(urls[i] + ' → ' + res.status);
-        return await res.text();
-      } catch (e) {
-        lastErr = e;
-        console.warn('[ZYZ opener] remote fail', urls[i], e);
-      }
-    }
-    throw lastErr || new Error('全部远程源失败');
+  function showErr(msg) {
+    var el = document.getElementById('boot');
+    if (!el) return;
+    el.innerHTML =
+      '<div><div style="font-size:22px;margin-bottom:8px">❌</div><div>加载失败</div>' +
+      '<div class="sub"></div><button type="button" id="retry">重试</button></div>';
+    var sub = el.querySelector('.sub');
+    if (sub) sub.textContent = String(msg || '');
+    var btn = document.getElementById('retry');
+    if (btn) btn.onclick = function () { location.reload(); };
   }
 
-  function runScript(old) {
+  function withTimeout(p, ms) {
     return new Promise(function (resolve, reject) {
-      var s = document.createElement('script');
-      if (old.type) s.type = old.type;
-      if (old.src) {
-        s.src = old.src;
-        s.onload = function () { resolve(); };
-        s.onerror = function () { reject(new Error('script ' + old.src)); };
-        document.body.appendChild(s);
-      } else {
-        s.textContent = old.textContent;
-        document.body.appendChild(s);
-        resolve();
-      }
+      var to = setTimeout(function () { reject(new Error('超时 ' + ms + 'ms')); }, ms);
+      p.then(
+        function (v) { clearTimeout(to); resolve(v); },
+        function (e) { clearTimeout(to); reject(e); }
+      );
     });
   }
 
-  async function boot() {
-    var mount = document.getElementById(MOUNT_ID);
-    if (!mount) return;
-    try {
-      var text = await fetchFirst(REMOTES);
-      var doc = new DOMParser().parseFromString(text, 'text/html');
-      mount.innerHTML = '';
-      mount.removeAttribute('style');
+  async function fetchOne(url, attempt) {
+    setStatus('正在拉取…', '第 ' + attempt + '/' + RETRY + ' 次\n' + url);
+    var u = url + (url.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
+    var res = await withTimeout(
+      fetch(u, { cache: 'no-store', mode: 'cors', credentials: 'omit' }),
+      TIMEOUT
+    );
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var text = await withTimeout(res.text(), TIMEOUT);
+    if (!text || text.length < 200) throw new Error('内容过短 ' + (text ? text.length : 0));
+    return text;
+  }
 
-      doc.querySelectorAll('style').forEach(function (node) {
-        mount.appendChild(document.importNode(node, true));
-      });
-
-      var scripts = [];
-      Array.prototype.forEach.call(doc.body.childNodes, function (node) {
-        if (node.nodeName === 'SCRIPT') scripts.push(node);
-        else if (node.nodeType === 1 || node.nodeType === 3) {
-          if (node.nodeType === 3 && !String(node.textContent).trim()) return;
-          mount.appendChild(document.importNode(node, true));
-        }
-      });
-
-      for (var i = 0; i < scripts.length; i++) {
-        await runScript(scripts[i]);
+  async function fetchHtml() {
+    var urls = [HTML_URL, FALLBACK_URL];
+    var last = null;
+    for (var i = 1; i <= RETRY; i++) {
+      var url = urls[(i - 1) % urls.length];
+      try {
+        return await fetchOne(url, i);
+      } catch (e) {
+        last = e;
+        await new Promise(function (r) { setTimeout(r, 700 * i); });
       }
+    }
+    throw last || new Error('fetch failed');
+  }
+
+  function injectAndRender(html) {
+    var s = String(html || '');
+    setStatus('注入界面…', 'size ' + s.length);
+    try {
+      document.open();
+      document.write(s);
+      document.close();
+      return;
+    } catch (e1) {
+      console.warn('[ZYZ opener] document.write 失败', e1);
+    }
+    try {
+      var blob = new Blob([s], { type: 'text/html;charset=utf-8' });
+      location.replace(URL.createObjectURL(blob));
+      return;
+    } catch (e2) {
+      console.warn('[ZYZ opener] blob 失败', e2);
+    }
+    showErr('无法注入页面');
+  }
+
+  async function main() {
+    try {
+      if (!HTML_URL || HTML_URL.indexOf('example.com') >= 0) {
+        showErr('未配置 HTML_URL');
+        return;
+      }
+      var html = await fetchHtml();
+      injectAndRender(html);
     } catch (e) {
       console.error('[ZYZ opener]', e);
-      mount.setAttribute('style', 'min-height:240px;background:#000;color:#f66;font:13px/1.6 sans-serif;padding:24px;text-align:center');
-      mount.textContent = '开场白管理加载失败：' + (e && e.message ? e.message : e);
+      showErr((e && e.message) ? e.message : String(e));
     }
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-  else boot();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', main);
+  else main();
 })();
 </script>
+</body>
+</html>

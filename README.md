@@ -10,7 +10,7 @@
 ## 用法
 
 1. 打开角色卡正则「【开场白】左宥之开场白管理…」
-2. 把替换内容整段换成仓库里的 [`shell.html`](./shell.html)
+2. 把替换内容整段换成仓库里的 [`shell.html`](./shell.html)（格式同同层微博远程壳：`document.write` 整页注入）
 3. 之后改索引 / 样式只改 `opener.html` 并 push
 
 ## 文件
@@ -18,6 +18,6 @@
 | 文件 | 说明 |
 |------|------|
 | `opener.html` | 远程完整开场白管理页（票根 / 观影规则 / 电影开场） |
-| `shell.html` | 酒馆消息框本地壳：fetch 远程并注入执行 |
+| `shell.html` | 酒馆正则本地壳：重试拉取 + `document.write` 注入 |
 
-本地壳会依次尝试 jsDelivr → GitHub Pages，并带时间戳避免缓存。
+本地壳优先 jsDelivr，失败则打 GitHub Pages；带重试、超时与时间戳防缓存。
