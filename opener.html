@@ -382,6 +382,11 @@ html,body{
     padding:14px 18px 16px;
     --notch-y:68%;
   }
+  /* 人物票单独收窄成长票根比例；观影须知票保持原尺寸。 */
+  .v-ticket-photo{
+    width:82%;
+    max-width:380px;
+  }
   .v-ticket-photo img{aspect-ratio:4/5;max-height:none;height:auto}
   .v-ticket-title{font-size:15px}
   .notice-pages{flex:none;min-height:auto;overflow:visible}
@@ -839,6 +844,30 @@ bgmBtn.addEventListener('keydown',e=>{
 });
 bgm.addEventListener('play',syncBgm);
 bgm.addEventListener('pause',syncBgm);
+
+/* 第一张票：让左右撕票孔精确对齐姓名下方的虚线。 */
+const photoTicket=document.querySelector('.v-ticket-photo');
+const photoTearLine=photoTicket?.querySelector('.v-ticket-title + .v-ticket-dots');
+const alignPhotoNotches=()=>{
+  if(!photoTicket||!photoTearLine)return;
+  const ticketRect=photoTicket.getBoundingClientRect();
+  const lineRect=photoTearLine.getBoundingClientRect();
+  if(ticketRect.width>0&&lineRect.top>=ticketRect.top){
+    photoTicket.style.setProperty('--notch-y',`${lineRect.top-ticketRect.top}px`);
+  }
+};
+const photoImg=photoTicket?.querySelector('img');
+if(photoImg){
+  if(photoImg.complete)requestAnimationFrame(alignPhotoNotches);
+  else photoImg.addEventListener('load',alignPhotoNotches,{once:true});
+}
+if('ResizeObserver'in window&&photoTicket){
+  new ResizeObserver(alignPhotoNotches).observe(photoTicket);
+}
+window.addEventListener('resize',alignPhotoNotches);
+document.getElementById('splash')?.addEventListener('click',()=>{
+  requestAnimationFrame(()=>requestAnimationFrame(alignPhotoNotches));
+});
 
 // 首次任意点击时顺带把 BGM 带起来；被浏览器拦下就静默失败，等按钮
 const tryBgm=()=>{
