@@ -203,7 +203,7 @@ html,body{
 }
 .film-strip-flow{
   --frame-w:58px;--film-gap:4px;--film-start:-29px;--film-cycle:496px;
-  display:block;padding-left:0;padding-right:0;cursor:ew-resize;
+  display:block;padding-left:0;padding-right:0;cursor:pointer;
 }
 .film-strip-flow::before,.film-strip-flow::after{left:0;right:0}
 .film-track{
@@ -219,6 +219,7 @@ html,body{
 @media(hover:hover) and (pointer:fine){
   .film-strip-flow:hover .film-track{animation-play-state:running}
 }
+.film-strip-flow.is-running .film-track{animation-play-state:running}
 .ticket-portrait-window{
   position:relative;height:148px;margin:1px 0 9px;padding:6px;background:#111;
   overflow:hidden;flex-shrink:0;
@@ -261,6 +262,12 @@ html,body{
   }
   .film-strip-flow:hover .film-frame::before{opacity:0}
 }
+.film-strip-flow.is-running .film-frame{
+  filter:grayscale(0) saturate(1) contrast(1.02) brightness(1);
+  box-shadow:inset 0 0 7px rgba(18,22,24,.1);
+}
+.film-strip-flow.is-running .film-frame::before{opacity:0}
+.film-strip-flow:focus-visible{outline:1px solid rgba(255,255,255,.72);outline-offset:2px}
 .ticket-tear-line{
   height:3px;border:0!important;margin:11px 0 12px!important;
   background:radial-gradient(circle,rgba(17,17,17,.42) 0 1px,transparent 1.25px) 0 50%/7px 3px repeat-x;
@@ -744,7 +751,7 @@ html,body{
 
 /* ══ 固定画布：所有设备统一使用当前 390px 手机版，不再响应式缩放 ══ */
 :root{
-  --canvas-width:390px;
+  --canvas-width:350px;
   --embed-height:804px;
   --frame-height:780px;
   --ticket-width:294px;
@@ -859,6 +866,18 @@ body{display:block!important}
   min-height:0!important;
   padding:16px!important;
   overflow:hidden!important;
+}
+.story-grid,.guide-list,
+.story-card,.guide-tip,.guide-notice,.route-card{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+}
+.story-info,.story-name,.story-desc,
+.guide-tip,.notice-page li,.route-row,.route-v{
+  min-width:0!important;
+  overflow-wrap:anywhere!important;
+  word-break:break-word!important;
 }
 #zyz-app #v-story.view.on,
 #zyz-app #v-guide.view.on{
@@ -1010,7 +1029,7 @@ body{display:block!important}
             <img src="https://i.postimg.cc/y69q04xj/IMG-0321.jpg" alt="Liquid Shire">
             <span class="still-caption">ARCHIVE / REEL 02</span>
           </div>
-          <div class="film-strip film-strip-flow" aria-hidden="true">
+          <div class="film-strip film-strip-flow" role="button" tabindex="0" aria-pressed="false" aria-label="点击播放或暂停胶片轮播">
             <div class="film-track">
               <span class="film-frame" data-frame="01" style="--still:url('https://cdn.jsdelivr.net/gh/fchris1219-del/yujing-audio@7860c1a/images/zyz-film-frames/zyz-film-gray-hoodie.png');--size:92% auto;--pos:50% 23%"></span>
               <span class="film-frame" data-frame="P1" style="--still:url('https://cdn.jsdelivr.net/gh/fchris1219-del/yujing-audio@9c952c1/images/zyz-film-frames/zyz-film-prop-red-apple.jpeg');--size:cover;--pos:50% 72%"></span>
@@ -1320,6 +1339,28 @@ document.getElementById('splash')?.addEventListener('click',()=>{
   requestAnimationFrame(()=>requestAnimationFrame(alignTicketNotches));
 });
 
+/* 手机没有 hover：点一下启动并显色，再点一下暂停并恢复灰白。 */
+const filmCarousel=document.querySelector('.film-strip-flow');
+const setFilmRunning=running=>{
+  if(!filmCarousel)return;
+  filmCarousel.classList.toggle('is-running',running);
+  filmCarousel.setAttribute('aria-pressed',String(running));
+};
+const toggleFilmOnTouch=()=>{
+  const fineHover=window.matchMedia&&window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+  if(fineHover)return;
+  setFilmRunning(!filmCarousel.classList.contains('is-running'));
+};
+if(filmCarousel){
+  filmCarousel.addEventListener('click',toggleFilmOnTouch);
+  filmCarousel.addEventListener('keydown',e=>{
+    if(e.key==='Enter'||e.key===' '){
+      e.preventDefault();
+      setFilmRunning(!filmCarousel.classList.contains('is-running'));
+    }
+  });
+}
+
 // 首次任意点击时顺带把 BGM 带起来；被浏览器拦下就静默失败，等按钮
 const tryBgm=()=>{
   if(bgmTried)return;
@@ -1405,6 +1446,8 @@ else init();
           1
         )
       );
+      var fixedEmbed=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--embed-height'))||0;
+      h=Math.max(h,fixedEmbed);
       document.documentElement.style.height=h+'px';
       document.body.style.height=h+'px';
       document.documentElement.style.minHeight=h+'px';
