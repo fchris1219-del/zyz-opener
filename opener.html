@@ -7,11 +7,25 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Courier+Prime:wght@400;700&family=Cormorant+Garamond:ital,wght@0,500;1,400;1,500&family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@200;300;400;500;600&display=swap');
 
+@font-face{
+  font-family:'HuiWen Mincho';
+  src:url('https://cdn.jsdelivr.net/gh/fchris1219-del/yujing-audio@5d8722c30834a7bbaaae905a17b182aec2598b51/xitiejie-player/huiwen-mincho.woff2') format('woff2');
+  font-display:swap;
+  font-style:normal;
+  font-weight:400 900;
+}
+
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+:root{
+  --embed-height:804px;
+  --frame-height:780px;
+  --font-cn:'HuiWen Mincho','汇文明朝体','ヒラギノ明朝 ProN','Hiragino Mincho ProN','Songti SC','STSong',serif;
+}
 
 html,body{
   margin:0;padding:0;
-  font-family:'Noto Sans SC',-apple-system,sans-serif;
+  font-family:var(--font-cn);
   background:#000;
   font-size:15px;line-height:1.6;
   -webkit-font-smoothing:antialiased;
@@ -66,7 +80,7 @@ html,body{
 
 .app{
   width:100%;max-width:640px;
-  height:85vh;min-height:560px;max-height:820px;
+  height:var(--frame-height);min-height:560px;max-height:820px;
   margin:0 auto;
   background:var(--bg-2);
   border-radius:0;
@@ -94,9 +108,9 @@ html,body{
   --r:10px;--gap:28px;--notch:9px;--notch-y:72%;
   position:relative;
   background:
-    linear-gradient(rgba(233,229,219,0.72), rgba(233,229,219,0.72)),
+    linear-gradient(rgba(255,255,255,.90),rgba(255,255,255,.90)),
     url('https://i.postimg.cc/W3YgWkhj/IMG-0320.jpg') center/cover no-repeat,
-    var(--paper);
+    #fff;
   /* 仅底部粗半圆打孔；顶部平直 */
   -webkit-mask:
     radial-gradient(circle var(--r) at var(--r) 100%, transparent var(--r), #000 calc(var(--r) + 0.6px)) bottom / var(--gap) var(--r) repeat-x,
@@ -135,19 +149,140 @@ html,body{
   width:0; /* 强制两票等分宽度 */
   min-width:0;
   display:flex;flex-direction:column;
-  padding:16px 18px 16px;
-  font-family:'Noto Serif SC',serif;
+  padding:14px 14px 17px;
+  font-family:var(--font-cn);
 }
 
-/* 左票头像 */
-.v-ticket-photo img{
-  display:block;width:100%;aspect-ratio:4/5;object-fit:cover;object-position:center 15%;
-  margin-bottom:11px;flex-shrink:0;
+/* 电影票编辑系统：超大标题、剧照窗、胶卷条、标签式档案 */
+.ticket-overline{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  margin-bottom:7px;font-family:'Courier Prime',monospace;font-size:7.2px;
+  font-weight:700;letter-spacing:1.35px;text-transform:uppercase;color:var(--text);
+}
+.ticket-overline span:first-child{padding:3px 5px;color:var(--paper);background:var(--text)}
+.ticket-overline span:last-child{color:var(--text-3)}
+.ticket-display-title{
+  font-family:'Bodoni 72','Didot',var(--font-cn)!important;
+  font-size:29px!important;font-weight:700!important;line-height:.93!important;
+  letter-spacing:-.9px!important;text-transform:uppercase;margin-bottom:10px;
+}
+.ticket-display-title small{
+  margin-top:6px!important;font-family:'Courier Prime',monospace!important;
+  font-size:7.5px!important;font-style:normal!important;font-weight:700!important;
+  line-height:1.3!important;letter-spacing:1px!important;text-transform:uppercase!important;
+}
+.ticket-portrait-heading{
+  display:grid;grid-template-columns:minmax(0,1fr) 56px;align-items:start;gap:9px;
+  margin-bottom:9px;
+}
+.ticket-portrait-heading .ticket-display-title{margin-bottom:0}
+.ticket-avatar{
+  position:relative;width:56px;aspect-ratio:1;padding:4px;background:#111;overflow:hidden;
+}
+.ticket-avatar img{
+  display:block;width:100%;height:100%;object-fit:cover;object-position:50% 19%;
+  filter:grayscale(.18) contrast(1.04);
+}
+.ticket-still{
+  position:relative;width:100%;margin-bottom:8px;padding:6px;background:#111;
+  overflow:hidden;flex-shrink:0;
+}
+.ticket-still>img{
+  display:block;width:100%;aspect-ratio:16/9;object-fit:cover;object-position:66% 16%;
+  margin:0!important;filter:grayscale(.12) contrast(1.03);
+}
+.ticket-still-art>img{aspect-ratio:16/10;object-position:center;filter:grayscale(.05) contrast(1.06)}
+.still-caption{
+  position:absolute;right:9px;bottom:9px;padding:3px 5px;
+  font-family:'Courier Prime',monospace;font-size:6.5px;font-weight:700;
+  letter-spacing:1px;color:#fff;background:#111;
+}
+.film-strip{
+  position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;
+  height:50px;margin:7px 0 9px;padding:9px 5px;background:#111;overflow:hidden;flex-shrink:0;
+}
+.film-strip-flow{
+  --frame-w:58px;--film-gap:4px;--film-start:-29px;--film-cycle:372px;
+  display:block;padding-left:0;padding-right:0;cursor:ew-resize;
+}
+.film-strip-flow::before,.film-strip-flow::after{left:0;right:0}
+.film-track{
+  position:relative;z-index:1;display:flex;gap:var(--film-gap);width:max-content;height:100%;
+  transform:translateX(var(--film-start));
+  animation:film-roll 14s linear infinite;animation-play-state:paused;will-change:transform;
+}
+.film-track .film-frame{flex:0 0 var(--frame-w)}
+@keyframes film-roll{
+  from{transform:translateX(var(--film-start))}
+  to{transform:translateX(calc(var(--film-start) - var(--film-cycle)))}
+}
+@media(hover:hover) and (pointer:fine){
+  .film-strip-flow:hover .film-track{animation-play-state:running}
+}
+.ticket-portrait-window{
+  position:relative;height:148px;margin:1px 0 9px;padding:6px;background:#111;
+  overflow:hidden;flex-shrink:0;
+}
+.ticket-portrait-window .portrait-window-image{
+  width:100%;height:100%;border:1px solid rgba(255,255,255,.66);
+  background-color:#070707;background-image:var(--still);background-repeat:no-repeat;
+  background-size:82% auto;background-position:50% 19%;
+}
+.film-strip::before,.film-strip::after{
+  content:'';position:absolute;z-index:2;left:5px;right:5px;height:4px;pointer-events:none;
+  background:repeating-linear-gradient(90deg,#fff 0 5px,transparent 5px 10px);
+}
+.film-strip::before{top:2px}.film-strip::after{bottom:2px}
+.film-frame{
+  position:relative;display:block;min-width:0;overflow:hidden;border:1px solid rgba(255,255,255,.62);
+  background-color:#050505;background-image:var(--still);background-size:var(--size,cover);
+  background-repeat:no-repeat;background-position:var(--pos,center);filter:grayscale(.24) contrast(1.06);
+}
+.film-frame::after{
+  content:attr(data-frame);position:absolute;z-index:2;right:2px;bottom:1px;
+  font:700 5.5px/1 'Courier Prime',monospace;letter-spacing:.5px;color:#fff;
+  text-shadow:0 1px 2px #000;
+}
+.film-strip-flow .film-frame{
+  border-color:rgba(245,247,248,.5);
+  background-image:var(--still);background-size:var(--size,cover);background-position:var(--pos,center);
+  filter:grayscale(.52) saturate(.42) contrast(1.07) brightness(.98);
+  box-shadow:inset 0 0 10px rgba(18,22,24,.2);transition:filter .45s ease,box-shadow .45s ease;
+}
+.film-strip-flow .film-frame::before{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(rgba(235,238,238,.13),rgba(30,33,34,.06));
+  opacity:1;transition:opacity .45s ease;
+}
+@media(hover:hover) and (pointer:fine){
+  .film-strip-flow:hover .film-frame{
+    filter:grayscale(0) saturate(1) contrast(1.02) brightness(1);
+    box-shadow:inset 0 0 7px rgba(18,22,24,.1);
+  }
+  .film-strip-flow:hover .film-frame::before{opacity:0}
+}
+.ticket-tear-line{
+  height:3px;border:0!important;margin:11px 0 12px!important;
+  background:radial-gradient(circle,rgba(17,17,17,.42) 0 1px,transparent 1.25px) 0 50%/7px 3px repeat-x;
+  -webkit-mask:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);
+  mask:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);
+}
+.ticket-ledger{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:1px 0 9px;
+  font-family:'Courier Prime',monospace;font-size:6.7px;font-weight:700;letter-spacing:.35px;
+  text-transform:uppercase;color:var(--text-2);
+}
+.ticket-ledger span{min-width:0;padding-top:4px;border-top:1px solid var(--text-4)}
+.ticket-ledger b{display:block;margin-bottom:2px;color:var(--text);font-size:6.2px;letter-spacing:.8px}
+
+/* 左票横向剧照锁定脸部区域 */
+.v-ticket-photo .ticket-still>img{
+  object-position:66% 16%;
 }
 
 /* 右票：已裁好的 CD 图，放在文字下方 */
 .v-ticket-notice .notice-art{
-  display:block;width:100%;margin-top:10px;flex-shrink:0;
+  display:block;width:100%;margin:0 0 8px;flex-shrink:0;
   line-height:0;
 }
 .v-ticket-notice .notice-art img{
@@ -155,32 +290,87 @@ html,body{
 }
 
 .v-ticket-title{
-  font-family:'Noto Serif SC',serif;font-weight:700;font-size:16px;letter-spacing:0.5px;
+  font-family:var(--font-cn);font-weight:700;font-size:16px;letter-spacing:0.5px;
   text-align:left;color:var(--text);line-height:1.2;flex-shrink:0;
 }
 .v-ticket-title small{
-  display:block;font-family:'Cormorant Garamond','Noto Serif SC',serif;font-style:italic;font-weight:400;
+  display:block;font-family:'Cormorant Garamond',var(--font-cn);font-style:italic;font-weight:400;
   font-size:11px;letter-spacing:1px;color:var(--text-3);margin-top:1px;text-transform:none;
 }
 .v-ticket-meta{
-  font-family:'Noto Serif SC',serif;font-weight:400;font-size:8.5px;line-height:1.85;
-  color:var(--text-2);text-align:left;letter-spacing:0.2px;flex-shrink:0;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 8px;
+  font-family:var(--font-cn);font-weight:400;font-size:8.2px;line-height:1.45;
+  color:var(--text-2);text-align:left;letter-spacing:0.1px;flex-shrink:0;
 }
-.v-ticket-meta div{margin-bottom:1px}
-.v-ticket-meta b{color:var(--text);font-weight:600}
+.v-ticket-meta div{min-width:0;margin:0}
+.v-ticket-meta b{
+  display:table;margin-bottom:3px;padding:2px 6px;border-radius:999px;
+  color:var(--paper);background:var(--text);font-family:'Courier Prime',monospace;
+  font-size:6.7px;font-weight:700;line-height:1.15;letter-spacing:.35px;
+}
 .v-ticket-dots{border-top:1px dotted var(--text-4);margin:8px 0;flex-shrink:0}
 .v-ticket-quote{
-  font-family:'Noto Serif SC',serif;font-style:normal;font-weight:400;font-size:11px;
+  font-family:var(--font-cn);font-style:normal;font-weight:400;font-size:11px;
   line-height:1.65;color:var(--text-2);text-align:left;
   padding:0;margin:0;width:100%;max-width:100%;flex:0 0 auto;
+}
+.ticket-note-stack{display:grid;gap:8px;flex-shrink:0}
+.ticket-note{
+  margin:0;font-family:var(--font-cn);font-size:9.2px;line-height:1.72;
+  color:var(--text-2);text-align:left;letter-spacing:.12px;
+}
+.ticket-note strong{color:var(--accent);font-weight:700}
+.ticket-note-release{
+  padding:7px 0 0 9px;border-left:2px solid var(--accent);
+  color:var(--text-3);font-size:8.8px;
+}
+.ticket-note-release strong{color:var(--text);font-weight:700}
+
+/* 第二章：把原说明迁走后，票面改为电影宣言式长文 */
+.manifesto-kicker{
+  font-family:'Courier Prime',monospace;font-size:8px;font-weight:700;
+  letter-spacing:1.8px;color:var(--accent);text-transform:uppercase;
+  margin-bottom:5px;
+}
+.v-ticket-notice .ticket-display-title{font-size:25px!important;line-height:1.02!important}
+.manifesto-body{
+  font-family:var(--font-cn);color:var(--text-2);
+  font-size:9.6px;line-height:1.82;text-align:justify;
+  text-justify:inter-ideograph;letter-spacing:.08px;
+}
+.manifesto-body p{margin:0 0 9px}
+.manifesto-body .manifesto-lead{
+  color:var(--text);font-size:10.2px;line-height:1.88;
+}
+.manifesto-body .manifesto-lead::first-letter{
+  float:left;font-family:'Cormorant Garamond',var(--font-cn);
+  font-size:30px;line-height:.82;margin:5px 5px 0 0;color:var(--accent);
+}
+.manifesto-break{
+  display:flex;align-items:center;gap:8px;margin:12px 0 11px;
+  font-family:'Courier Prime',monospace;font-size:7.5px;font-weight:700;
+  letter-spacing:1.6px;color:var(--text-3);white-space:nowrap;
+}
+.manifesto-break::before,.manifesto-break::after{
+  content:'';height:1px;flex:1;background:var(--text-4);
+}
+.manifesto-question{
+  margin:11px 0!important;padding:9px 0 9px 10px;
+  border-left:2px solid var(--accent);color:var(--text)!important;
+  font-weight:600;line-height:1.9!important;text-align:left;
+}
+.manifesto-coda{
+  margin:13px 0 4px!important;text-align:center!important;
+  color:var(--accent)!important;font-weight:700;line-height:2!important;
+  letter-spacing:.5px!important;
 }
 
 /* 右票：必读事项 */
 .notice-pages{flex:1;position:relative;min-height:0;overflow:visible}
 .notice-pages::-webkit-scrollbar{width:0}
-.notice-page{list-style:none;font-family:'Noto Serif SC',serif}
+.notice-page{list-style:none;font-family:var(--font-cn)}
 .notice-page li{
-  font-family:'Noto Serif SC',serif;font-size:9.5px;line-height:1.55;color:var(--text-2);
+  font-family:var(--font-cn);font-size:9.5px;line-height:1.55;color:var(--text-2);
   margin-bottom:8px;padding-left:11px;position:relative;text-align:left;
 }
 .notice-page li::before{
@@ -212,6 +402,7 @@ html,body{
 
 @media(prefers-reduced-motion:reduce){
   .bgm-btn.on .eq span{animation:none;height:9px}
+  .film-track{animation:none}
 }
 
 /* ── 开场白（电影开场） ── */
@@ -248,6 +439,16 @@ html,body{
 .guide-tip{background:rgba(255,255,255,0.95);border:1px dashed var(--accent-line);border-radius:0;padding:12px 15px;font-size:11.5px;line-height:1.75;color:var(--text-2);flex-shrink:0}
 .guide-tip b{color:var(--accent);font-weight:600}
 .guide-tip .warn{color:var(--warn);font-weight:600}
+.guide-notice{
+  background:var(--paper);border:1px solid var(--line);padding:15px 16px 8px;
+  flex-shrink:0;position:relative;
+}
+.guide-notice::before{
+  content:'ADMISSION NOTES';display:block;margin-bottom:10px;
+  font-family:'Courier Prime',monospace;font-size:8.5px;font-weight:700;
+  letter-spacing:2px;color:var(--accent);
+}
+.guide-notice .notice-page li{font-size:11px;line-height:1.7;margin-bottom:9px}
 .guide-group{font-family:'Courier Prime',monospace;font-size:10px;font-weight:700;color:var(--onblue-2);letter-spacing:2.5px;margin:8px 2px 0;display:flex;align-items:center;gap:8px;flex-shrink:0}
 .guide-group::before{content:'';width:3px;height:11px;background:var(--onblue);border-radius:2px;box-shadow:0 0 8px rgba(255,255,255,0.4)}
 .route-card{background:var(--card);border:1px solid var(--line);border-radius:0;padding:14px 16px;flex-shrink:0;transition:border-color .25s ease,background .25s ease}
@@ -382,15 +583,24 @@ html,body{
     padding:14px 18px 16px;
     --notch-y:68%;
   }
-  .v-ticket-photo img{aspect-ratio:4/5;max-height:none;height:auto}
+  .ticket-still>img{aspect-ratio:16/9;max-height:none;height:auto}
+  .ticket-still-art>img{aspect-ratio:16/10}
   .v-ticket-title{font-size:15px}
+  .ticket-display-title{font-size:31px!important}
+  .v-ticket-notice .ticket-display-title{
+    font-size:clamp(19px,5.6vw,22px)!important;white-space:nowrap;
+  }
+  .ticket-note{font-size:9.8px;line-height:1.78}
+  .ticket-note-release{font-size:9.3px}
+  .manifesto-body{font-size:10.5px;line-height:1.9}
+  .manifesto-body .manifesto-lead{font-size:11px}
   .notice-pages{flex:none;min-height:auto;overflow:visible}
   .notice-page li{font-size:10px;line-height:1.55}
   .bgm-btn{top:14px;right:14px;width:30px;height:30px}
   /* 电影票保持自然高度；索引和开场白限制外框，长内容只在列表内滚动。 */
   .app[data-view="v-guide"],
   .app[data-view="v-story"]{
-    height:min(78svh,720px)!important;
+    height:720px!important;
     min-height:460px!important;
     max-height:720px!important;
     overflow:hidden;
@@ -469,8 +679,8 @@ html,body{
 
 /* ══ 平板 ══ */
 @media(min-width:769px) and (max-width:1023px){
-  body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#000}
-  .app{max-width:760px;height:85vh;min-height:620px;max-height:900px;border-radius:0;box-shadow:0 0 0 1px var(--line),0 40px 90px rgba(0,0,0,0.7)}
+  body{display:flex;justify-content:center;align-items:center;min-height:var(--embed-height);background:#000}
+  .app{max-width:760px;height:var(--frame-height);min-height:620px;max-height:900px;border-radius:0;box-shadow:0 0 0 1px var(--line),0 40px 90px rgba(0,0,0,0.7)}
   .ticket-duo{padding:52px 18px 22px;gap:20px}
   .v-ticket{padding:16px 20px 14px}
   .v-ticket-quote{font-size:11.5px}
@@ -489,8 +699,8 @@ html,body{
 
 /* ══ 桌面 ══ */
 @media(min-width:1024px) and (max-width:1399px){
-  body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#000}
-  .app{max-width:720px;height:84vh;min-height:640px;max-height:920px;border-radius:0;box-shadow:0 0 0 1px var(--line),0 50px 120px rgba(0,0,0,0.75)}
+  body{display:flex;justify-content:center;align-items:center;min-height:var(--embed-height);background:#000}
+  .app{max-width:720px;height:var(--frame-height);min-height:640px;max-height:920px;border-radius:0;box-shadow:0 0 0 1px var(--line),0 50px 120px rgba(0,0,0,0.75)}
   .ticket-duo{padding:52px 18px 22px;gap:20px}
   .v-ticket{padding:16px 20px 14px}
   .v-ticket-quote{font-size:11.5px}
@@ -509,8 +719,8 @@ html,body{
 
 /* ══ 大屏 ══ */
 @media(min-width:1400px){
-  body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#000}
-  .app{max-width:800px;height:82vh;min-height:680px;max-height:960px;border-radius:0;box-shadow:0 0 0 1px var(--line),0 60px 140px rgba(0,0,0,0.8)}
+  body{display:flex;justify-content:center;align-items:center;min-height:var(--embed-height);background:#000}
+  .app{max-width:800px;height:var(--frame-height);min-height:680px;max-height:960px;border-radius:0;box-shadow:0 0 0 1px var(--line),0 60px 140px rgba(0,0,0,0.8)}
   .ticket-duo{padding:56px 22px 24px;gap:22px}
   .v-ticket{padding:18px 22px 15px}
   .v-ticket-quote{font-size:12px}
@@ -574,43 +784,76 @@ html,body{
 <div class="app" id="zyz-app">
   <div class="main">
     <div class="view on" id="v-info">
-      <div class="bgm-btn" id="bgm-btn" role="button" tabindex="0" aria-label="背景音乐">
+      <div class="bgm-btn" id="bgm-btn" role="button" tabindex="0" aria-label="背景音乐" aria-pressed="false">
         <div class="eq"><span></span><span></span><span></span></div>
       </div>
 
       <div class="ticket-duo">
         <div class="ticket v-ticket v-ticket-photo">
-          <img src="https://i.postimg.cc/TPmFnrXb/6.jpg" alt="左宥之">
-          <div class="v-ticket-title">左宥之 <small>Zuo Youzhi on 7 july 2026</small></div>
-          <div class="v-ticket-dots"></div>
+          <div class="ticket-overline"><span>Motion Picture</span><span>Admit 01 / ZYZ</span></div>
+          <div class="ticket-portrait-heading">
+            <div class="v-ticket-title ticket-display-title">左宥之 <small>Zuo Youzhi · 07 July 2026 · Portrait Archive</small></div>
+            <div class="ticket-avatar" aria-label="左宥之小头像">
+              <img src="https://cdn.jsdelivr.net/gh/fchris1219-del/yujing-audio@7860c1a/images/zyz-film-frames/zyz-film-winter-scarf.webp" alt="左宥之小头像">
+            </div>
+          </div>
+          <div class="ticket-portrait-window" aria-label="左宥之横向剧照">
+            <div class="portrait-window-image" style="--still:url('https://cdn.jsdelivr.net/gh/fchris1219-del/yujing-audio@7860c1a/images/zyz-film-frames/zyz-film-night-road.jpeg')"></div>
+            <span class="still-caption">PORTRAIT / 35MM</span>
+          </div>
+          <div class="v-ticket-dots ticket-tear-line"></div>
           <div class="v-ticket-meta">
             <div><b>作者：</b>山间玉　小红书@山肩雨</div>
-            <div><b>完全无雷，欢迎 repo </b> </div>
+            <div class="ticket-meta-sentence">完全无雷，欢迎 repo</div>
             <div><b>发布社区：</b>旅程 / 多林国</div>
-            <div><b>人设类型：</b>年上狐狸男</div>
+            <div><b>人设类型：</b>诡计多端的骚货</div>
+          </div>
+          <div class="v-ticket-dots"></div>
+          <div class="ticket-note-stack">
+            <p class="ticket-note">你哥性格非常神经质，这是一个骚逼、回避型、敏感肌、控制狂，还很爱装，<strong>请多尝试，多调教他💗</strong>。</p>
+            <p class="ticket-note ticket-note-release">发布于 <strong>Discord 社区多林国与旅程</strong>，本卡<strong>免费</strong>，禁止倒卖引流。</p>
           </div>
           <div class="v-ticket-dots"></div>
           <p class="v-ticket-quote">满贯流量影帝人设，诡计多端的骚货，值得玩弄的贱逼。</p>
         </div>
 
         <div class="ticket v-ticket v-ticket-notice">
-          <div class="v-ticket-title">观影须知</div>
-          <div class="v-ticket-dots"></div>
-          <div class="notice-pages">
-            <ul class="notice-page on">
-              <li>你哥性格非常神经质，这是一个骚逼、回避型、敏感肌、控制狂，还很爱装 <span class="hl">请多尝试，多调教他💗</span>。</li>
-              <li>目前只有BG<span class="hl">要改其他的自助，想透也可以自助</span>，想改GB可以试试布鲁克林线。</li>
-              <li>这是一张<span class="hl">变量卡</span>，请先下载<span class="hl">酒馆助手</span>，否则变量与状态栏无法正常运行。</li>
-              <li>导入后请<span class="warn">打开世界书自定义排序并阅读世界书信息</span>，可按说明阅读对应的特定条目（可参考底部「观影须知」页）。</li>
-              <li>同层微博 <span class="hl">打开快速回复使用，教程详情见社区。</span>。</li>
-              <li>初始化数据打开世界书改 <span class="hl">对应[initvar]条目的数据内容，格式别改。</span>。</li>
-              <li>推荐模型 <span class="hl">Claude Opus 4.6/4.8</span>。</li>
-              <li>(8.08手写重构私生女线）作者后续还会持续更新世界书，目前自己试玩不动了，大家<span class="hl">多给点 repo</span></li>
-              <li>发布于 <span class="hl">Discord 社区多林国与旅程</span>，本卡<span class="warn">免费</span>，禁止倒卖引流。</li>
-            </ul>
+          <div class="ticket-overline"><span>Chapter II</span><span>The Eighth Art</span></div>
+          <div class="v-ticket-title ticket-display-title">我们赖以生存的所有光影 <small>A language inherited from Viola</small></div>
+          <div class="ticket-ledger" aria-label="电影票信息">
+            <span><b>Format</b>35mm</span>
+            <span><b>Reel</b>02 / Viola</span>
+            <span><b>Language</b>Cinema</span>
           </div>
-          <div class="notice-art">
+          <div class="notice-art ticket-still ticket-still-art">
             <img src="https://i.postimg.cc/y69q04xj/IMG-0321.jpg" alt="Liquid Shire">
+            <span class="still-caption">ARCHIVE / REEL 02</span>
+          </div>
+          <div class="film-strip film-strip-flow" aria-hidden="true">
+            <div class="film-track">
+              <span class="film-frame" data-frame="01" style="--still:url('https://cdn.jsdelivr.net/gh/fchris1219-del/yujing-audio@7860c1a/images/zyz-film-frames/zyz-film-gray-hoodie.png');--size:92% auto;--pos:50% 23%"></span>
+              <span class="film-frame" data-frame="P1" style="--still:url('https://cdn.jsdelivr.net/gh/fchris1219-del/yujing-audio@9c952c1/images/zyz-film-frames/zyz-film-prop-red-apple.jpeg');--size:cover;--pos:50% 72%"></span>
+              <span class="film-frame" data-frame="03" style="--still:url('https://cdn.jsdelivr.net/gh/fchris1219-del/yujing-audio@7860c1a/images/zyz-film-frames/zyz-film-blue-glasses.jpeg');--size:74% auto;--pos:50% 22%"></span>
+              <span class="film-frame" data-frame="P2" style="--still:url('https://cdn.jsdelivr.net/gh/fchris1219-del/yujing-audio@9c952c1/images/zyz-film-frames/zyz-film-prop-white-echo.jpeg');--size:cover;--pos:50% 42%"></span>
+              <span class="film-frame" data-frame="04" style="--still:url('https://cdn.jsdelivr.net/gh/fchris1219-del/yujing-audio@7860c1a/images/zyz-film-frames/zyz-film-night-road.jpeg');--size:74% auto;--pos:50% 18%"></span>
+              <span class="film-frame" data-frame="05" style="--still:url('https://i.postimg.cc/TPmFnrXb/6.jpg');--size:cover;--pos:66% 16%"></span>
+              <span class="film-frame" data-frame="01" style="--still:url('https://cdn.jsdelivr.net/gh/fchris1219-del/yujing-audio@7860c1a/images/zyz-film-frames/zyz-film-gray-hoodie.png');--size:92% auto;--pos:50% 23%"></span>
+              <span class="film-frame" data-frame="P1" style="--still:url('https://cdn.jsdelivr.net/gh/fchris1219-del/yujing-audio@9c952c1/images/zyz-film-frames/zyz-film-prop-red-apple.jpeg');--size:cover;--pos:50% 72%"></span>
+              <span class="film-frame" data-frame="03" style="--still:url('https://cdn.jsdelivr.net/gh/fchris1219-del/yujing-audio@7860c1a/images/zyz-film-frames/zyz-film-blue-glasses.jpeg');--size:74% auto;--pos:50% 22%"></span>
+              <span class="film-frame" data-frame="P2" style="--still:url('https://cdn.jsdelivr.net/gh/fchris1219-del/yujing-audio@9c952c1/images/zyz-film-frames/zyz-film-prop-white-echo.jpeg');--size:cover;--pos:50% 42%"></span>
+              <span class="film-frame" data-frame="04" style="--still:url('https://cdn.jsdelivr.net/gh/fchris1219-del/yujing-audio@7860c1a/images/zyz-film-frames/zyz-film-night-road.jpeg');--size:74% auto;--pos:50% 18%"></span>
+              <span class="film-frame" data-frame="05" style="--still:url('https://i.postimg.cc/TPmFnrXb/6.jpg');--size:cover;--pos:66% 16%"></span>
+            </div>
+          </div>
+          <div class="v-ticket-dots ticket-tear-line"></div>
+          <div class="manifesto-body">
+            <p class="manifesto-lead">他的母亲Viola曾经是世界上最好的演员，后来她是世界上最好的母亲。对于跟着母亲长大的左宥之来说，电影从来不是他的爱好，而是他的母语，是血脉中重力式的下坠。他和曾经的陈雅澜一样，都属于世界。</p>
+            <div class="manifesto-break">THE LANGUAGE OF LIGHT</div>
+            <p>电影的诞生从古希腊时期的埃皮达鲁斯，到现代的第八艺术。</p>
+            <p>我们跨越遥远的距离，渺小的人类从那么久以前开始，就在灰暗的空间里，久久地只凝望眼前的白色幕布，要从音乐，台词，和呼吸中洞察这些重重叠叠的灵魂。</p>
+            <p>小时候，他曾经在布鲁克林最温暖的地方：母亲拥抱着他，在家里的地下室里去观看她年轻时候的影片。每一个人在电影里都向前进，向后退，希望抛去一切，去和自己的灵魂沉默的共舞。</p>
+            <p class="manifesto-question">左宥之，你想要演戏吗？<br>你想要从这种迷茫而空洞的世界里，去留下自己的脚步吗？</p>
+            <p class="manifesto-coda">去爱他吧，去和他相爱吧。<br>他正在等待长出一颗赤诚的心。<br>等待你为他降临。</p>
           </div>
         </div>
       </div>
@@ -631,6 +874,18 @@ html,body{
   </div>
   <div class="guide-list">
     <div class="guide-tip">已创建自动化脚本，无需手动打开条目，本索引是为了方便手动排查问题。<b>mvu_update</b> 常规线务必打开；<span class="warn">伪骨科／私生女变量自带更新规则，切勿再叠加 mvu_update</span>。背景、变量、nsfw 均为二选一，同组只开一个。点开场白后脚本会自动切线。</div>
+
+    <div class="guide-notice">
+      <ul class="notice-page">
+        <li>目前只有 BG，<span class="hl">要改其他的自助，想透也可以自助</span>；想改 GB 可以试试布鲁克林线。</li>
+        <li>这是一张<span class="hl">变量卡</span>，请先下载<span class="hl">酒馆助手</span>，否则变量与状态栏无法正常运行。</li>
+        <li>导入后请<span class="warn">打开世界书自定义排序并阅读世界书信息</span>，可按下方线路索引检查对应条目。</li>
+        <li>同层微博请<span class="hl">打开快速回复使用，教程详情见社区</span>。</li>
+        <li>需要重新初始化时，直接打开悬浮 <span class="hl">Route 工具</span>，选择对应线路并点击“切线并初始化”；无需再进入世界书修改 initvar。</li>
+        <li>推荐模型 <span class="hl">Claude Opus 4.6 / 4.8</span>。</li>
+        <li>（8.31 更新“淡眼泪”）作者后续还会持续更新世界书，目前自己试玩不动了，大家<span class="hl">多给点 repo</span>。</li>
+      </ul>
+    </div>
 
     <div class="guide-group">常规线</div>
 
@@ -797,6 +1052,16 @@ html,body{
       </div>
     </div>
 
+    <div class="route-card">
+      <div class="route-head"><span class="route-name">淡眼泪</span><span class="route-tag sp">私生女 · 穿越</span></div>
+      <div class="route-rows">
+        <div class="route-row"><span class="route-k">背景</span><span class="route-v">漫游藻海 · 常规线背景</span></div>
+        <div class="route-row"><span class="route-k">变量</span><span class="route-v">私生女变量 <span class="warn">（不开 mvu_update）</span></span></div>
+        <div class="route-row"><span class="route-k">nsfw</span><span class="route-v">常规 nsfw</span></div>
+        <div class="route-row"><span class="route-k">开场白</span><span class="route-v"><span class="acc">【常规·私生女线】</span> <span class="off">复用本线世界书</span></span></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -805,7 +1070,7 @@ html,body{
   <div class="step-bar">
     <button class="step-btn" id="stepPrev" type="button">‹ 上一步</button>
     <div class="step-dots" id="stepDots">1 / 3</div>
-    <button class="step-btn" id="stepNext" type="button">观影须知 ›</button>
+    <button class="step-btn" id="stepNext" type="button">观影规则 ›</button>
   </div>
   <div class="navbar" id="navbar"></div>
 </div>
@@ -823,9 +1088,14 @@ const play=()=>{try{if(snd.readyState>=2){snd.currentTime=0;snd.play()}}catch(e)
 const bgm=$('bgm');
 const bgmBtn=$('bgm-btn');
 bgm.volume=0.3;
+try{snd.load();bgm.load()}catch(e){}
 let bgmTried=false;
 
-const syncBgm=()=>bgmBtn.classList.toggle('on',!bgm.paused);
+const syncBgm=()=>{
+  const playing=!bgm.paused;
+  bgmBtn.classList.toggle('on',playing);
+  bgmBtn.setAttribute('aria-pressed',String(playing));
+};
 
 const toggleBgm=e=>{
   if(e)e.stopPropagation();
@@ -840,28 +1110,29 @@ bgmBtn.addEventListener('keydown',e=>{
 bgm.addEventListener('play',syncBgm);
 bgm.addEventListener('pause',syncBgm);
 
-/* 第一张票：让左右撕票孔精确对齐姓名下方的虚线。 */
-const photoTicket=document.querySelector('.v-ticket-photo');
-const photoTearLine=photoTicket?.querySelector('.v-ticket-title + .v-ticket-dots');
-const alignPhotoNotches=()=>{
-  if(!photoTicket||!photoTearLine)return;
-  const ticketRect=photoTicket.getBoundingClientRect();
-  const lineRect=photoTearLine.getBoundingClientRect();
-  if(ticketRect.width>0&&lineRect.top>=ticketRect.top){
-    photoTicket.style.setProperty('--notch-y',`${lineRect.top-ticketRect.top}px`);
-  }
+/* 两张票：让侧边撕票孔分别对齐各自的粗虚线。 */
+const infoTickets=Array.from(document.querySelectorAll('.v-ticket'));
+const alignTicketNotches=()=>{
+  infoTickets.forEach(ticket=>{
+    const tearLine=ticket.querySelector('.ticket-tear-line');
+    if(!tearLine)return;
+    const ticketRect=ticket.getBoundingClientRect();
+    const lineRect=tearLine.getBoundingClientRect();
+    if(ticketRect.width>0&&lineRect.top>=ticketRect.top){
+      ticket.style.setProperty('--notch-y',`${lineRect.top-ticketRect.top}px`);
+    }
+  });
 };
-const photoImg=photoTicket?.querySelector('img');
-if(photoImg){
-  if(photoImg.complete)requestAnimationFrame(alignPhotoNotches);
-  else photoImg.addEventListener('load',alignPhotoNotches,{once:true});
+document.querySelectorAll('.ticket-still img').forEach(img=>{
+  if(img.complete)requestAnimationFrame(alignTicketNotches);
+  else img.addEventListener('load',alignTicketNotches,{once:true});
+});
+if('ResizeObserver'in window){
+  infoTickets.forEach(ticket=>new ResizeObserver(alignTicketNotches).observe(ticket));
 }
-if('ResizeObserver'in window&&photoTicket){
-  new ResizeObserver(alignPhotoNotches).observe(photoTicket);
-}
-window.addEventListener('resize',alignPhotoNotches);
+window.addEventListener('resize',alignTicketNotches);
 document.getElementById('splash')?.addEventListener('click',()=>{
-  requestAnimationFrame(()=>requestAnimationFrame(alignPhotoNotches));
+  requestAnimationFrame(()=>requestAnimationFrame(alignTicketNotches));
 });
 
 // 首次任意点击时顺带把 BGM 带起来；被浏览器拦下就静默失败，等按钮
