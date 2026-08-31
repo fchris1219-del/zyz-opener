@@ -749,6 +749,7 @@ html,body{
   --frame-height:780px;
   --ticket-width:294px;
   --step-bar-height:52px;
+  --host-bottom-guard:14px;
 }
 html,body{
   width:100%!important;
@@ -791,8 +792,8 @@ body{display:block!important}
 .app.revealed{display:flex!important}
 .main{
   position:relative!important;
-  flex:0 0 calc(var(--frame-height) - var(--step-bar-height))!important;
-  height:calc(var(--frame-height) - var(--step-bar-height))!important;
+  flex:0 0 calc(var(--frame-height) - var(--step-bar-height) - var(--host-bottom-guard))!important;
+  height:calc(var(--frame-height) - var(--step-bar-height) - var(--host-bottom-guard))!important;
   min-height:0!important;
   overflow:hidden!important;
 }
@@ -848,8 +849,8 @@ body{display:block!important}
 }
 .app[data-view="v-guide"] .main,
 .app[data-view="v-story"] .main{
-  flex:0 0 calc(var(--frame-height) - var(--step-bar-height))!important;
-  height:calc(var(--frame-height) - var(--step-bar-height))!important;
+  flex:0 0 calc(var(--frame-height) - var(--step-bar-height) - var(--host-bottom-guard))!important;
+  height:calc(var(--frame-height) - var(--step-bar-height) - var(--host-bottom-guard))!important;
   min-height:0!important;
   overflow:hidden!important;
 }
@@ -883,7 +884,7 @@ body{display:block!important}
   position:absolute!important;
   left:0!important;
   right:0!important;
-  bottom:0!important;
+  bottom:var(--host-bottom-guard)!important;
   z-index:30!important;
   width:100%!important;
   height:var(--step-bar-height)!important;
